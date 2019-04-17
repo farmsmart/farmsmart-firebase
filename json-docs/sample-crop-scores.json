@@ -1,0 +1,26 @@
+{
+  "crop": {
+    "title": "Crop name",
+    "dataHash": "abcd"
+  },
+  "scores": [
+    {
+      "factor": "Location",
+      "weight": 0.8,
+      "percentage": 25.0,
+      "values": [{ "key": "Mombasa", "rating": 5 }, { "key": "Kwale", "rating": 5 }]
+    },
+    {
+      "factor": "Intention",
+      "weight": 0.8,
+      "percentage": 50.0,
+      "values": [{ "key": "Sales", "rating": 10 }, { "key": "Subsistence", "rating": 9 }, { "key": "Both", "rating": 7 }]
+    },
+    {
+      "factor": "Irrigation",
+      "weight": 0.8,
+      "percentage": 0.25,
+      "values": [{ "key": "Yes", "rating": 6 }]
+    }
+  ]
+}

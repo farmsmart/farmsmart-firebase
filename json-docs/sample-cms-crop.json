@@ -1,0 +1,13 @@
+{
+  "_fl_meta_": {
+    "schema": "crop",
+    "docId": "AAA",
+    "fl_id": "AAA",
+    "env": "production",
+    "locale": "en-US",
+    "schemaType": "collection"
+  },
+  "id": "AAA",
+  "title": "Okra",
+  "status": "PUBLISHED"
+}
