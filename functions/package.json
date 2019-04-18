@@ -5,6 +5,7 @@
     "prettier": "pretty-quick --pattern **/firestore/**/*.js --pattern **/utils/**/*.js",
     "lint": "eslint .",
     "test": "jest unit --detectOpenHandles --coverage --silent",
+    "test:watch": "jest --watch --silent",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
