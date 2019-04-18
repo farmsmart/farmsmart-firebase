@@ -12,7 +12,6 @@ jobs:
     working_directory: /tmp/workspace/farmsmart
     steps:
       - checkout
-
       - restore_cache:
           key: dependency-cache-{{ .Branch }}
       - run:
@@ -43,11 +42,10 @@ jobs:
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: code base lint
-          command: | 
-                   npm run-script lint
-                   npm run-script test   
+          command: |
+            npm run-script lint
+            npm run-script test   
 
-      
   deploy:
     executor: node-executor
     steps:
@@ -60,22 +58,19 @@ jobs:
 
 workflows:
   version: 2
-
   backend:
-    jobs: 
+    jobs:
       - build
       - test:
           requires:
             - build
       # TODO: Basic deployment strategy. ie Only deploy on master and develop
-      # TODO: Note this is a live deploy, so need to revisit           
+      # TODO: Note this is a live deploy, so need to revisit
       - deploy:
           requires:
             - test
           filters:
             branches:
-              only: 
+              only:
                 - develop
                 - master
-
-      
