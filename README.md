@@ -5,9 +5,9 @@ starting season, farming purpose (such as for profit), as well as details about 
 In addition, the app will include the latest farming tips as well as links to various chat groups,
 enabling farmers to communicate, share information and eventually sell their produce.
 
-# Setting up Firebase Cloud Functions Functions
+This repository contains the Firebase backend services such as Cloud Functions and Rules for Firestore and Cloud Storage.
 
-[Firebase Function Quickstart Guide](https://firebase.google.com/docs/functions/get-started)
+## Get started
 
 1. Install NodeJS. This project uses Node 8
 2. Install the firebase CLI to global
@@ -16,17 +16,100 @@ enabling farmers to communicate, share information and eventually sell their pro
 $ npm install -g firebase-tools
 ```
 
-### Running Tests
+[> Firebase Function Quickstart Guide](https://firebase.google.com/docs/functions/get-started)
 
-For local testing ensure you go into the `functions` directory to run npm commands as defined
-in `functions/package.json` file.
-From the `farmsmart-firebase` root directory
+## Writing functions
+
+Note that you will need to switch to the functions directory before running `npm` commands
+
+```bash
+$ cd functions
+```
+
+In order to keep a maintainable `index.js` the project declares functions in separate files which are then dynamically named and referenced from the index.
+
+#### Conventions
+
+- Should follow a directory structure based on the Firebase service
+- Should be named based on the event type
+- Must use a `.f.js` suffix in the filename
+- Should store tests with the function
 
 ```
-$ cd functions
+functions/
+  auth/
+    on_create.f.js
+    on_delete.f.js
+  firestore/
+    users/
+      on_create.f.js
+    content/
+      on_write.f.js
+  utils/
+    helper.js
+```
+
+This will result in the following functions being deployed
+
+```
+authOnCreate
+authOnDelete
+firestoreUsersOnCreate
+firestoreContentOnWrite
+```
+
+[> More on organising Cloud Functions](https://codeburst.io/organizing-your-firebase-cloud-functions-67dc17b3b0da)
+
+## Testing functions
+
+### Linting and format
+
+Coding standards are defined in `.eslintrc.json` and `.prettierrc`.
+
+```bash
 $ npm run lint
+$ npm run prettier
+```
+
+### Unit
+
+Tests are written using [Jest](https://jestjs.io/) and include a coverage report. As a soft rule we aim for 80% coverage. Exported modules must include tests.
+
+```bash
 $ npm test
 ```
+
+#### Conventions
+
+- Should include tests in same directory as the module
+- Should follow a `describe('My Module')` ... `it('should ...')` format
+- Must use a `.test.js` suffix in the filename
+
+```
+functions/
+  firestore/
+    content/
+      on_write.f.js
+      on_write.test.js
+```
+
+Test configuration is managed in the `jest` section of `package.json`. We use `jest-dot-reporter` by default for simplified output in the console.
+
+### Running functions locally
+
+You can run your functions locally before commiting them into CI. This executes your functions against your currently set Firebase project. Use `firebase list` and `firebase set` commands to manage which project to target.
+
+```bash
+$ npm run shell
+```
+
+The console will list out the available functions which can then be run by providing some json data and any params
+
+```
+firestoreContentOnWrite({ before: oldData, after: newData, params: { id: 123 } })
+```
+
+[> More details for running locally](https://firebase.google.com/docs/functions/local-emulator)
 
 ## Farmsmart Cloud Function Environment configurations
 

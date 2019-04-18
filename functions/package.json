@@ -2,7 +2,7 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "prettier": "pretty-quick --pattern **/db/**/*.js --pattern **/utils/**/*.js",
+    "prettier": "pretty-quick --pattern **/firestore/**/*.js --pattern **/utils/**/*.js",
     "lint": "eslint .",
     "test": "jest unit --detectOpenHandles --coverage --silent",
     "serve": "firebase serve --only functions",
@@ -37,7 +37,7 @@
   },
   "jest": {
     "testMatch": [
-      "**/db/**/*unit.test.js",
+      "**/firestore/**/*unit.test.js",
       "**/utils/**/*unit.test.js"
     ],
     "testPathIgnorePatterns": [

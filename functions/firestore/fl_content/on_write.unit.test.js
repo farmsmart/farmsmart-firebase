@@ -23,7 +23,7 @@ describe('fl_content On Write', () => {
     deleteDocumentStub = jest.spyOn(firestore, 'deleteDocument').mockImplementation(() => {});
 
     myFunctions = require('../../index');
-    wrapped = test.wrap(myFunctions.dbFlContentOnWrite);
+    wrapped = test.wrap(myFunctions.firestoreFlContentOnWrite);
   });
 
   afterAll(() => {
