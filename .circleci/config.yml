@@ -13,11 +13,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dependency-cache-{{ .Branch }}
-      - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: install firebase
-          command: npm install --save-dev firebase-tools
+          key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: update firebase
@@ -27,9 +23,9 @@ jobs:
           name: install app dependencies
           command: npm install
       - save_cache:
-          key: dependency-cache-{{ .Branch }}
+          key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
           paths:
-            - /tmp/workspace/farmsmart/functions/.node_modules
+            - /tmp/workspace/farmsmart/functions/node_modules
       - persist_to_workspace:
           root: /tmp/workspace
           paths:
@@ -44,7 +40,9 @@ jobs:
           name: code base lint
           command: |
             npm run-script lint
-            npm run-script test   
+            npm run-script test:ci
+      - store_test_results:
+          path: /tmp/workspace/farmsmart/functions/reports
 
   deploy:
     executor: node-executor
@@ -54,7 +52,7 @@ jobs:
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: deploy firebase
-          command: npm run deploy -- --token $FIREBASE_TOKEN
+          command: npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT
 
 workflows:
   version: 2
@@ -64,13 +62,23 @@ workflows:
       - test:
           requires:
             - build
-      # TODO: Basic deployment strategy. ie Only deploy on master and develop
-      # TODO: Note this is a live deploy, so need to revisit
       - deploy:
+          # Uses a context that encapsulates firebase login and project for dev env
+          name: deploy-to-dev
+          context: farmsmart_dev
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - /feature.*/
+      - deploy:
+          # Uses a context that encapsulates firebase login and project for pre-prod env
+          name: deploy-to-preprod
+          context: farmsmart_pre_prod
           requires:
             - test
           filters:
             branches:
               only:
                 - develop
-                - master

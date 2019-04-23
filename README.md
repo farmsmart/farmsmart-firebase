@@ -1,5 +1,7 @@
 # farmsmart-firebase
 
+[![CircleCI](https://circleci.com/gh/farmsmart/farmsmart-firebase.svg?style=svg)](https://circleci.com/gh/farmsmart/farmsmart-firebase)
+
 The FarmSmart is a mobile app providing tailored recommendations to farmers based on their location,
 starting season, farming purpose (such as for profit), as well as details about their land.
 In addition, the app will include the latest farming tips as well as links to various chat groups,
