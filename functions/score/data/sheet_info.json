@@ -1,0 +1,159 @@
+{
+  "spreadsheetId": "LR6NolCGM7wc2lFpLZ5JyYggD1QgqVeUKNY65C7hE",
+  "properties": {
+    "title": "Recommendations Engine",
+    "locale": "en_US",
+    "autoRecalc": "ON_CHANGE",
+    "timeZone": "Europe/London",
+    "defaultFormat": {
+      "backgroundColor": {
+        "red": 1,
+        "green": 1,
+        "blue": 1
+      },
+      "padding": {
+        "top": 2,
+        "right": 3,
+        "bottom": 2,
+        "left": 3
+      },
+      "verticalAlignment": "BOTTOM",
+      "wrapStrategy": "OVERFLOW_CELL",
+      "textFormat": {
+        "foregroundColor": {},
+        "fontFamily": "arial,sans,sans-serif",
+        "fontSize": 10,
+        "bold": false,
+        "italic": false,
+        "strikethrough": false,
+        "underline": false
+      }
+    }
+  },
+  "sheets": [
+    {
+      "properties": {
+        "sheetId": 510791867,
+        "title": "Crop Test",
+        "index": 0,
+        "sheetType": "GRID",
+        "gridProperties": {
+          "rowCount": 1003,
+          "columnCount": 31,
+          "hideGridlines": true
+        }
+      },
+      "merges": [
+        {
+          "sheetId": 510791867,
+          "startRowIndex": 15,
+          "endRowIndex": 16,
+          "startColumnIndex": 2,
+          "endColumnIndex": 5
+        },
+        {
+          "sheetId": 510791867,
+          "startRowIndex": 15,
+          "endRowIndex": 16,
+          "startColumnIndex": 5,
+          "endColumnIndex": 8
+        }
+      ],
+      "conditionalFormats": [
+        {
+          "ranges": [
+            {
+              "sheetId": 510791867,
+              "startRowIndex": 4,
+              "endRowIndex": 10,
+              "startColumnIndex": 5,
+              "endColumnIndex": 6
+            }
+          ],
+          "gradientRule": {
+            "minpoint": {
+              "color": {
+                "red": 0.9019608,
+                "green": 0.4862745,
+                "blue": 0.4509804
+              },
+              "type": "NUMBER",
+              "value": "0"
+            },
+            "midpoint": {
+              "color": {
+                "red": 1,
+                "green": 0.8509804,
+                "blue": 0.4
+              },
+              "type": "NUMBER",
+              "value": "0.5"
+            },
+            "maxpoint": {
+              "color": {
+                "red": 0.34117648,
+                "green": 0.73333335,
+                "blue": 0.5411765
+              },
+              "type": "NUMBER",
+              "value": "1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "properties": {
+        "sheetId": 0,
+        "title": "Tomato Scores",
+        "index": 1,
+        "sheetType": "GRID",
+        "gridProperties": {
+          "rowCount": 1004,
+          "columnCount": 31,
+          "hideGridlines": true
+        }
+      }
+    },
+    {
+      "properties": {
+        "sheetId": 128657465,
+        "title": "Okra Scores",
+        "index": 2,
+        "sheetType": "GRID",
+        "gridProperties": {
+          "rowCount": 1004,
+          "columnCount": 31,
+          "hideGridlines": true
+        }
+      }
+    },
+    {
+      "properties": {
+        "sheetId": 196280593,
+        "title": "Reference Table",
+        "index": 3,
+        "sheetType": "GRID",
+        "gridProperties": {
+          "rowCount": 1000,
+          "columnCount": 27
+        }
+      },
+      "basicFilter": {
+        "range": {
+          "sheetId": 196280593,
+          "startRowIndex": 0,
+          "endRowIndex": 1000,
+          "startColumnIndex": 0,
+          "endColumnIndex": 1
+        },
+        "sortSpecs": [
+          {
+            "sortOrder": "ASCENDING"
+          }
+        ]
+      }
+    }
+  ],
+  "spreadsheetUrl": "https://docs.google.com/spreadsheets/d/1o-LR6NolCGM7wc2lFpLZ5JyYggD1QgqVeUKNY65C7hE/edit"
+}
