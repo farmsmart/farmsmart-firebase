@@ -13,7 +13,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dependency-cache-{{ .Branch }}-{{ checksum "functions/package-lock.json" }}
+          key: dependency-cache-{{ .Branch }}-{{ checksum "functions/package.json" }}
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: install firebase
@@ -27,7 +27,7 @@ jobs:
           name: install app dependencies
           command: npm install
       - save_cache:
-          key: dependency-cache-{{ .Branch }}-{{ checksum "functions/package-lock.json" }}
+          key: dependency-cache-{{ .Branch }}-{{ checksum "functions/package.json" }}
           paths:
             - /tmp/workspace/farmsmart/functions/.node_modules
       - persist_to_workspace:
@@ -46,7 +46,7 @@ jobs:
             npm run-script lint
             npm run-script test:ci
       - store_test_results:
-          path: reports
+          path: /tmp/workspace/farmsmart/functions/reports
 
   deploy:
     executor: node-executor
