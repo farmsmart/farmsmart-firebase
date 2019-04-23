@@ -54,7 +54,7 @@ jobs:
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: deploy firebase
-          command: npm run deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT
+          command: npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT
 
 workflows:
   version: 2
