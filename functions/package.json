@@ -15,7 +15,7 @@
   },
   "jest-junit": {
     "outputDirectory": "./reports/junit",
-    "outputName": "js-test-results.xml"
+    "outputName": "results.xml"
   },
   "dependencies": {
     "ajv": "^6.10.0",
