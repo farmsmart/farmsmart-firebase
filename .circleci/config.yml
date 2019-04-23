@@ -16,10 +16,6 @@ jobs:
           key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
-          name: install firebase
-          command: npm install --save-dev firebase-tools
-      - run:
-          working_directory: /tmp/workspace/farmsmart/functions
           name: update firebase
           command: npm install firebase-admin@latest firebase-functions@latest
       - run:
