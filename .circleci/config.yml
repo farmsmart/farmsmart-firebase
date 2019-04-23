@@ -65,7 +65,8 @@ workflows:
           requires:
             - build
       - deploy:
-          # Uses a context that encapsulates firebase login and project for dev
+          # Uses a context that encapsulates firebase login and project for dev env
+          name: deploy-to-dev
           context: farmsmart_dev
           requires:
             - test
@@ -74,7 +75,8 @@ workflows:
               only:
                 - /feature.*/
       - deploy:
-          # Uses a context that encapsulates firebase login and project for pre-prod
+          # Uses a context that encapsulates firebase login and project for pre-prod env
+          name: deploy-to-preprod
           context: farmsmart_pre_prod
           requires:
             - test
