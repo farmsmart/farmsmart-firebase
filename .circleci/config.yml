@@ -54,7 +54,7 @@ jobs:
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: deploy firebase
-          command: npm run deploy -- --token $FIREBASE_TOKEN
+          command: npm run deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT
 
 workflows:
   version: 2
@@ -64,13 +64,14 @@ workflows:
       - test:
           requires:
             - build
-      # TODO: Basic deployment strategy. ie Only deploy on master and develop
-      # TODO: Note this is a live deploy, so need to revisit
       - deploy:
+          # Uses a context that encapsulates firebase login and project
+          context: farmsmart_dev
           requires:
             - test
           filters:
             branches:
               only:
                 - develop
-                - master
+                - /feature.*/
+      
