@@ -3,6 +3,7 @@ module.exports = {
   moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx'],
   testMatch: [
     '**/firestore/**/*unit.test.js',
+    '**/https/**/*unit.test.js',
     '**/utils/**/*unit.test.js',
     '**/score/**/*unit.test.js',
   ],
