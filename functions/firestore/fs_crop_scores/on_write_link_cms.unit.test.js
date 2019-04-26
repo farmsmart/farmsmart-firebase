@@ -206,7 +206,7 @@ describe('fs_crop_scores On Write', () => {
 
     expect(insertScoreResult).toBeCalled();
     expect(fs).toBeCalled();
-    expect(collectionMock).toHaveBeenCalledTimes(2);
+    expect(collectionMock).toBeCalled();
     expect(fetchSwahili).toBeCalled();
     expect(fetchMain).toBeCalled();
     expect(queryMock).toHaveBeenCalledTimes(2);
