@@ -1,10 +1,9 @@
 const admin = require('firebase-admin');
 const functions = require('firebase-functions');
-const datahelper = require('../../score/datahelper');
 
-const { google } = require('googleapis');
-const gsheets = google.sheets('v4');
+const sheets_helper = require('../../score/sheets_helper');
 
+const score_repository = require('../../score/score_repository');
 const transform_info = require('../../score/transform_info');
 const transform_score = require('../../score/transform_score');
 
@@ -29,26 +28,20 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       sheetId = request.query.sheetId;
     }
 
-    const apiauth = await google.auth.getClient({
-      scopes: 'https://sheets.googleapis.com/v4/spreadsheets',
-    });
+    const apiauth = sheets_helper.authenticate();
 
     console.log(`Processing worksheet ${sheetId}`);
-    const requestContext = {
-      spreadsheetId: sheetId,
-      auth: apiauth,
-      key: apiKey,
-    };
-    const spreadsheet = await gsheets.spreadsheets.get(requestContext).then(result => {
-      console.log(`Successfully fetched worksheet ${result.data.properties.title}.`);
-      return Promise.resolve(transform_info.transformSpreadsheetDoc(result.data));
+
+    const spreadsheet = await sheets_helper.fetchSpreadsheet().then(data => {
+      return Promise.resolve(transform_info.transformSpreadsheetDoc(data));
     });
+
     // Update the record of the spreadsheet document into fs_score_info
     // It is possible to have multiple spreadsheets by passing in a different id
     let db = admin.firestore();
     const infoRef = db.collection(`fs_score_info`).doc(sheetId);
-    await db.runTransaction(async tx => {
-      spreadsheet.lastFetch = admin.firestore.Timestamp.fromDate(new Date());
+    await db.runTransaction(tx => {
+      spreadsheet.lastFetch = score_repository.createDate(new Date());
       tx.set(infoRef, spreadsheet, { merge: true });
     });
 
@@ -61,12 +54,12 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       if (!scoreData.crop.title) {
         return Promise.reject(new Error(`Transformed document is invalid`));
       } else {
-        console.log(`Writing crop score to FireStore: ${scoreData.crop.title}`);
         let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.title);
         return db.runTransaction(tx => {
+          console.log(`Writing crop score to FireStore: ${scoreData.crop.title}`);
           let meta = {};
           meta.spreadsheetId = sheetId;
-          meta.updated = admin.firestore.Timestamp.fromDate(new Date());
+          meta.updated = score_repository.createDate(new Date());
           scoreData.meta = meta;
           tx.set(scoreRef, scoreData, { merge: true });
           return Promise.resolve(scoreData.crop.title);
@@ -75,7 +68,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     };
     const scorePromises = [];
     for (const sheetData of spreadsheet.cropSheets) {
-      let promise = datahelper
+      let promise = sheets_helper
         .fetchSheetValues(sheetData.sheet, apiauth, sheetId, apiKey)
         .then(transformResultData)
         .then(writeScoreToFireStore);
@@ -84,6 +77,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     console.log(`Processing ${scorePromises.length} score sheets.`);
     await Promise.all(scorePromises);
 
+    console.log('Successfully processed spreadsheet');
     response.status(200).send('OK');
   } catch (err) {
     console.log(err);

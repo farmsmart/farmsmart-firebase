@@ -1,10 +1,17 @@
 const chai = require('chai');
-const assert = chai.assert;
-const expected = chai.expect;
+const admin = require('firebase-admin');
 
 describe('Score repository', () => {
   let repository;
   beforeAll(() => {
+    jest.spyOn(admin, 'initializeApp').mockImplementation(() => {});
+
+    jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
+      collection: () => ({
+        doc: () => ({}),
+      }),
+    }));
+
     repository = require('./score_repository');
   });
 

@@ -1,6 +1,3 @@
-const { google } = require('googleapis');
-const gsheets = google.sheets('v4');
-
 exports.getScoreChange = function(current, previous) {
   let scoreChange = {
     isChange: false,
@@ -86,20 +83,4 @@ exports.getCmsCropChange = function(current, previous) {
   }
 
   return cropChange;
-};
-
-exports.fetchSheetValues = function(sheetTitle, apiauth, sheetId, apiKey, handler) {
-  const sheetRequest = {
-    key: apiKey,
-    auth: apiauth,
-    spreadsheetId: sheetId,
-    majorDimension: 'ROWS',
-    valueRenderOption: 'FORMATTED_VALUE',
-    range: sheetTitle,
-  };
-
-  return gsheets.spreadsheets.values.get(sheetRequest).then(result => {
-    console.log('Fetched sheet: ' + sheetTitle);
-    return Promise.resolve(result.data);
-  });
 };

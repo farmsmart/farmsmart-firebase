@@ -1,3 +1,11 @@
+const admin = require('firebase-admin');
+
+try {
+  admin.initializeApp();
+} catch (err) {
+  // firebase already initialised
+}
+
 exports.createLinkIfScoreExists = async function(
   scoresRef,
   linksRef,
@@ -18,4 +26,8 @@ exports.createLinkIfScoreExists = async function(
 exports.deleteLink = async function(linksRef, cmsDocId) {
   console.log(`Removing ${cmsDocId} from ${linksRef.path} `);
   await linksRef.doc(cmsDocId).delete();
+};
+
+exports.createDate = function() {
+  return admin.firestore.Timestamp.fromDate(new Date());
 };
