@@ -33,7 +33,9 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     console.log(`Processing worksheet ${sheetId}`);
 
     const spreadsheet = await sheets_helper.fetchSpreadsheet().then(data => {
-      return Promise.resolve(transform_info.transformSpreadsheetDoc(data));
+      let result = transform_info.transformSpreadsheetDoc(data);
+      console.log('Fetched spreadsheet');
+      return Promise.resolve(result);
     });
 
     // Update the record of the spreadsheet document into fs_score_info
@@ -48,7 +50,8 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     // Fetches sheet from google API => Transform into JSON document => Write to FireStore
     const transformResultData = data => {
       console.log(`Transforming sheet data into Crop Score`);
-      return Promise.resolve(transform_score.transformCropScore(data));
+      let result = transform_score.transformCropScore(data);
+      return Promise.resolve(result);
     };
     const writeScoreToFireStore = scoreData => {
       if (!scoreData.crop.title) {
