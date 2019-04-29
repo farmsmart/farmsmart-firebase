@@ -9,7 +9,6 @@ const transform_score = require('../../score/transform_score');
 describe('htts On Request upload spreadsheet', () => {
   let wrapped;
   let request, response;
-  let statusFunction, sendFunction;
   let firestoreCollection;
 
   beforeAll(() => {
@@ -57,7 +56,6 @@ describe('htts On Request upload spreadsheet', () => {
       collection: firestoreCollection,
       runTransaction: callable => {
         console.log('called mock transaction');
-        expect(true).toBeTruthy();
         return callable(tx);
       },
     }));
@@ -94,9 +92,8 @@ describe('htts On Request upload spreadsheet', () => {
       status: callStatus,
     };
 
-    // Asserts that the transaction called twice
-    // finally that the send function was called
-    expect.assertions(4);
+    // asserts that callbacks were called
+    expect.assertions(2);
     wrapped(request, response);
 
     done();
