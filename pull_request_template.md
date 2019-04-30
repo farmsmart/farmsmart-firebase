@@ -7,12 +7,12 @@ CHANGEME - JIRA ID and name
 @farmsmart/amido please review.
 
 # DETAILS
-### :mag: Change
+### :construction: Change
 ```
 CHANGEME
 ```
 
-### :grey_exclamation: Testing
+### :traffic_light: Testing
 ```
 CHANGEME
 ```
