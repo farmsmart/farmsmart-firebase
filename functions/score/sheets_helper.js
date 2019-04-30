@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 
-exports.authenticate = async function() {
-  return await google.auth.getClient({
+exports.authenticate = function() {
+  return google.auth.getClient({
     scopes: 'https://sheets.googleapis.com/v4/spreadsheets',
   });
 };

@@ -28,15 +28,17 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       sheetId = request.query.sheetId;
     }
 
-    const apiauth = sheets_helper.authenticate();
+    const apiauth = await sheets_helper.authenticate();
 
     console.log(`Processing worksheet ${sheetId}`);
 
-    const spreadsheet = await sheets_helper.fetchSpreadsheet().then(data => {
-      let result = transform_info.transformSpreadsheetDoc(data);
-      console.log('Fetched spreadsheet');
-      return Promise.resolve(result);
-    });
+    const spreadsheet = await sheets_helper
+      .fetchSpreadsheet(sheetId, apiauth, apiKey)
+      .then(data => {
+        let result = transform_info.transformSpreadsheetDoc(data);
+        console.log('Fetched spreadsheet');
+        return Promise.resolve(result);
+      });
 
     // Update the record of the spreadsheet document into fs_score_info
     // It is possible to have multiple spreadsheets by passing in a different id
@@ -45,6 +47,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     await db.runTransaction(tx => {
       spreadsheet.lastFetch = score_repository.createDate(new Date());
       tx.set(infoRef, spreadsheet, { merge: true });
+      return Promise.resolve(true);
     });
 
     // Fetches sheet from google API => Transform into JSON document => Write to FireStore
