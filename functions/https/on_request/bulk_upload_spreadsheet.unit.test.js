@@ -27,17 +27,21 @@ describe('htts On Request upload spreadsheet', () => {
   });
 
   it('should return a 200 response on success', async done => {
+    let txCount = 0;
+
     let tx = {
       set: jest.fn(),
     };
 
     jest.spyOn(admin, 'initializeApp').mockImplementation(() => {});
 
-    jest.spyOn(sheets_helper, 'authenticate').mockReturnValue({});
+    let authCall = jest.spyOn(sheets_helper, 'authenticate').mockReturnValue({});
 
-    jest.spyOn(sheets_helper, 'fetchSheetValues').mockReturnValue(Promise.resolve(true));
+    jest.spyOn(sheets_helper, 'fetchSheetValues').mockReturnValue(Promise.resolve({}));
 
-    jest.spyOn(sheets_helper, 'fetchSpreadsheet').mockReturnValue(Promise.resolve(true));
+    let fetchSpreadsheet = jest
+      .spyOn(sheets_helper, 'fetchSpreadsheet')
+      .mockReturnValue(Promise.resolve({}));
 
     test.mockConfig({
       farmsmart: {
@@ -58,6 +62,7 @@ describe('htts On Request upload spreadsheet', () => {
       runTransaction: callable => {
         console.log('called mock transaction');
         expect(true).toBeTruthy();
+        txCount = txCount + 1;
         return callable(tx);
       },
     }));
@@ -80,25 +85,25 @@ describe('htts On Request upload spreadsheet', () => {
       query: { sheetId: 'SHEET-ID' },
     };
 
-    function callSend() {
+    sendFunction = jest.fn().mockImplementation(() => {
       console.log('Send!');
       expect(true).toBeTruthy();
-      done();
-    }
-    function callStatus(data) {
-      expect(data).toBe(200);
-      return { send: callSend };
-    }
+    });
+    statusFunction = jest.fn().mockImplementation(() => ({
+      send: sendFunction,
+    }));
 
     response = {
-      status: callStatus,
+      status: statusFunction,
     };
 
     // Asserts that the transaction called twice
     // finally that the send function was called
-    expect.assertions(4);
-    wrapped(request, response);
+    expect.assertions(3);
+    await wrapped(request, response);
 
+    expect(authCall).toHaveBeenCalled();
+    expect(fetchSpreadsheet).toHaveBeenCalled();
     done();
   });
 });
