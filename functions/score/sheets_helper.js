@@ -6,7 +6,7 @@ exports.authenticate = function() {
   });
 };
 
-exports.fetchSheetValues = function(sheetTitle, apiauth, sheetId, apiKey, handler) {
+exports.fetchSheetValues = function(sheetTitle, apiauth, sheetId, apiKey) {
   const sheetRequest = {
     key: apiKey,
     auth: apiauth,
