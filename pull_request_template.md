@@ -4,7 +4,7 @@ CHANGEME - JIRA ID and name
 ```
 
 ### :eyeglasses: Review 
-:name_badge: @farmsmart/amido please review.
+@farmsmart/amido please review.
 
 # DETAILS
 ### :mag: Change
