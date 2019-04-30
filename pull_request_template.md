@@ -3,21 +3,21 @@
 CHANGEME - JIRA ID and name
 ```
 
-#### Review
-@farmsmart/amido please review.
+### :eyeglasses: Review 
+:name_badge: @farmsmart/amido please review.
 
 # DETAILS
-### Change:
+### :mag: Change
 ```
 CHANGEME
 ```
 
-### Testing:
+### :grey_exclamation: Testing
 ```
 CHANGEME
 ```
 
-### Coding Standard Checklist
+### :heavy_check_mark: Coding Standard Checklist
 
 - [ ] Unit Test Coverage 80%
 - [ ] TODO tasks has corresponding JIRA IDs if not completed in this PR
