@@ -18,11 +18,19 @@ This repository contains the Firebase backend services such as Cloud Functions a
 $ npm install -g firebase-tools
 ```
 
+3. Checkout the source code
+4. Change directory into `functions` directory and run install
+
+```bash
+$ cd functions
+$ npm install
+```
+
 [> Firebase Function Quickstart Guide](https://firebase.google.com/docs/functions/get-started)
 
 ## Writing functions
 
-Note that you will need to switch to the functions directory before running `npm` commands
+Note that you will need to switch to the `functions` directory before running `npm` commands
 
 ```bash
 $ cd functions
@@ -85,17 +93,17 @@ $ npm test
 
 - Should include tests in same directory as the module
 - Should follow a `describe('My Module')` ... `it('should ...')` format
-- Must use a `.test.js` suffix in the filename
+- Must use a `.unit.test.js` suffix in the filename
 
 ```
 functions/
   firestore/
     content/
       on_write.f.js
-      on_write.test.js
+      on_write.unit.test.js
 ```
 
-Test configuration is managed in the `jest` section of `package.json`. We use `jest-dot-reporter` by default for simplified output in the console.
+Test configuration is managed in the `jest.config.js`. By default use `npm run test` for simplified output in the console.
 
 ### Running functions locally
 
@@ -116,6 +124,7 @@ firestoreContentOnWrite({ before: oldData, after: newData, params: { id: 123 } }
 ## Farmsmart Cloud Function Environment configurations
 
 `farmsmart.sheets.api.key` - project config that holds the sheets api key used to access a google spreadsheet from the cloud function
+
 `farmsmart.scorematrix.doc.id` - the google spreadsheet document id to the score matrix data
 
 ## Helpful Firebase Cloud functions commands
@@ -142,32 +151,4 @@ $ firebase deploy --only functions:<name_of_cloud_function>
 
 # delete cloud functions if deleted form index.js
  firebase functions:delete <name_of_cloud_function> --region us-central1 --force
-```
-
-## Score data JSONPath queries
-
-[Sample Physical Model For Scores](./json-dcs/sample-crop-scores.json)
-
-JSONP for the score models
-
-```
-$.scores[?(@.factor=='season')].values[?(@.key=='yes')].rating
-```
-
-JsonPath to retrieve all the scores for a given factor (ie intention)
-
-```
-$.scores[?(@.factor=='intention')].values
-```
-
-JsonPath for factors we have scores for:
-
-```
-$.scores[*].factor
-```
-
-JsonPath for weightings we have scores for:
-
-```
-$.scores[?(@.values)].factor
 ```
