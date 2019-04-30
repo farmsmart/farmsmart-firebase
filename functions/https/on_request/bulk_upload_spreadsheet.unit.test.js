@@ -27,8 +27,6 @@ describe('htts On Request upload spreadsheet', () => {
   });
 
   it('should return a 200 response on success', async done => {
-    let txCount = 0;
-
     let tx = {
       set: jest.fn(),
     };
@@ -62,7 +60,6 @@ describe('htts On Request upload spreadsheet', () => {
       runTransaction: callable => {
         console.log('called mock transaction');
         expect(true).toBeTruthy();
-        txCount = txCount + 1;
         return callable(tx);
       },
     }));
@@ -98,7 +95,9 @@ describe('htts On Request upload spreadsheet', () => {
     };
 
     // N.B. there are 5 assertions invoked that is expected and ci/linux recognizes it correctly
+    // Expect at least one of the async callbacks was called (e.g. transaction)
     expect.hasAssertions();
+
     await wrapped(request, response);
 
     expect(authCall).toHaveBeenCalled();
