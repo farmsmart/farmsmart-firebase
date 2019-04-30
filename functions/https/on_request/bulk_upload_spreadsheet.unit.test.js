@@ -97,9 +97,8 @@ describe('htts On Request upload spreadsheet', () => {
       status: statusFunction,
     };
 
-    // Asserts that the transaction called twice
-    // finally that the send function was called
-    expect.assertions(3);
+    // N.B. there are 5 assertions invoked that is expected and ci/linux recognizes it correctly
+    expect.hasAssertions();
     await wrapped(request, response);
 
     expect(authCall).toHaveBeenCalled();
