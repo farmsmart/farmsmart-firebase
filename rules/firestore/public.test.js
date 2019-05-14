@@ -1,5 +1,5 @@
-const firebase = require('@firebase/testing');
-const fs = require('fs');
+const firebase = require("@firebase/testing");
+const fs = require("fs");
 
 const projectId = `project-${Date.now()}`;
 let app;
@@ -7,16 +7,15 @@ let app;
 // Firestore emulator must be running
 // firebase serve --only firestore
 
-describe('Firestore rules', () => {
+describe("Firestore public access", () => {
   beforeAll(async () => {
     app = await firebase.initializeTestApp({
-      projectId: projectId,
-      auth: { uid: 'alice', email: 'alice@example.com' }
+      projectId: projectId
     });
 
     await firebase.loadFirestoreRules({
       projectId: projectId,
-      rules: fs.readFileSync('firestore/firestore.rules', 'utf8')
+      rules: fs.readFileSync("firestore/firestore.rules", "utf8")
     });
   });
 
@@ -24,23 +23,23 @@ describe('Firestore rules', () => {
     await Promise.all(firebase.apps().map(app => app.delete()));
   });
 
-  it('should deny unauthenticated reads', async () => {
+  it("should deny reads", async () => {
     await firebase.assertFails(
       app
         .firestore()
-        .collection('private')
-        .doc('super-secret-document')
+        .collection("private")
+        .doc("super-secret-document")
         .get()
     );
   });
 
-  it('should deny unauthenticated writes', async () => {
+  it("should deny writes", async () => {
     await firebase.assertFails(
       app
         .firestore()
-        .collection('private')
-        .doc('super-secret-document')
-        .set({ key: 'value' })
+        .collection("private")
+        .doc("super-secret-document")
+        .set({ key: "value" })
     );
   });
 });
