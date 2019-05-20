@@ -33,7 +33,7 @@ describe('htts On Request upload spreadsheet', () => {
 
     jest.spyOn(admin, 'initializeApp').mockImplementation(() => {});
 
-    let authCall = jest.spyOn(sheets_helper, 'authenticate').mockReturnValue({});
+    let authCall = jest.spyOn(sheets_helper, 'authenticateServiceAccount').mockReturnValue({});
 
     jest.spyOn(sheets_helper, 'fetchSheetValues').mockReturnValue(Promise.resolve({}));
 

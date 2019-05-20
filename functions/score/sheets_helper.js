@@ -1,9 +1,18 @@
 const { google } = require('googleapis');
+const { JWT } = require('google-auth-library');
 
 exports.authenticate = function() {
   return google.auth.getClient({
     scopes: 'https://sheets.googleapis.com/v4/spreadsheets',
   });
+};
+
+exports.authenticateServiceAccount = function(credentialFile) {
+  const keys = require('../.credentials/' + credentialFile);
+  const client = new JWT(keys.client_email, null, keys.private_key, [
+    'https://www.googleapis.com/auth/spreadsheets',
+  ]);
+  return Promise.resolve(client);
 };
 
 exports.fetchSheetValues = function(sheetTitle, apiauth, sheetId, apiKey) {

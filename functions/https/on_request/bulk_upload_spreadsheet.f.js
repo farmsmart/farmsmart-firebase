@@ -28,7 +28,9 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       sheetId = request.query.sheetId;
     }
 
-    const apiauth = await sheets_helper.authenticate();
+    const apiauth = await sheets_helper.authenticateServiceAccount(
+      functions.config().farmsmart.sheets.jsonauth
+    );
 
     console.log(`Processing worksheet ${sheetId}`);
 
