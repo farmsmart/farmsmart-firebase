@@ -4,13 +4,19 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles --reporters=default"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@firebase/testing": "^0.7.10",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-jest": "^22.5.1",
+    "eslint-plugin-promise": "^4.1.1",
     "jest": "^24.7.1",
-    "jest-dot-reporter": "^1.0.7"
+    "jest-dot-reporter": "^1.0.7",
+    "jest-junit": "^6.4.0",
+    "prettier": "^1.17.1"
   }
 }
