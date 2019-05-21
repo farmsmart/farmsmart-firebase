@@ -62,6 +62,7 @@ jobs:
 
             echo "deploy"
             echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${SECRETS_DIR}/auth.json
+            file /tmp/workspace/farmsmart/functions/.credentials/auth.json
             npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
 workflows:
