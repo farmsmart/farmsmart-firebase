@@ -1,7 +1,65 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if request.auth.uid != null;
+
+    function hasReadAccess() {
+      return true;
     }
+
+    function isFlamelinkUser() {
+      return exists(/databases/$(database)/documents/fl_users/$(request.auth.uid));
+    }
+
+    match /fl_content/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    } 
+
+    match /fl_environments/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_files/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_folders/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_locales/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_permissions/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_schemas/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_settings/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fl_users/{document} {
+      allow read: if hasReadAccess();
+      allow write: if isFlamelinkUser();
+    }
+
+    match /fs_crop_scores/{document} {
+      allow read: if hasReadAccess();
+    }
+
+    match /fs_crop_score_cms_link/{document} {
+      allow read: if hasReadAccess();
+    }       
   }
 }
