@@ -53,7 +53,7 @@ jobs:
           working_directory: /tmp/workspace/farmsmart/functions
           name: deploy firebase
           command: |
-            SECRETS_DIR=./credentials
+            SECRETS_DIR=./.credentials
             mkdir -p ${SECRETS_DIR}
             echo "Set firebase project config"
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
