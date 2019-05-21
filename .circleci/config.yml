@@ -52,7 +52,14 @@ jobs:
       - run:
           working_directory: /tmp/workspace/farmsmart/functions
           name: deploy firebase
-          command: npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
+          command: |
+            npm run --silent set:config -- farmsmart.sheets.jsonauth=auth.json
+            npm run --silent set:config -- farmsmart.sheets.api.key=${SHEETS_API_KEY}
+            npm run --silent set:config -- farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
+            SECRETS_DIR=./credentials
+            mkdir -p ${SECRETS_DIR}
+            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di | tee ${SECRETS_DIR}/auth.json
+            npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
 workflows:
   version: 2
