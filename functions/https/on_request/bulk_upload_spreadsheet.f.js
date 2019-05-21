@@ -94,7 +94,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         <body>
           <h1>Score upload successful.</h1>
           <p>Sheet: ${spreadsheet.title}</p>
-          <p>Fetch: ${spreadsheet.lastFetch}</p>
+          <p>Fetch: ${new Date()}</p>
         </body>
       </html>
     `);
