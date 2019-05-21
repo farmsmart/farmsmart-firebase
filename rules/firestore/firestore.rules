@@ -60,6 +60,10 @@ service cloud.firestore {
 
     match /fs_crop_score_cms_link/{document} {
       allow read: if hasReadAccess();
+    }
+
+    match /fs_users/{userId}/{document=**} {
+      allow read, write: if request.auth.uid == userId;
     }       
   }
 }
