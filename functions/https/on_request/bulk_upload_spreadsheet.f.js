@@ -28,7 +28,9 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       sheetId = request.query.sheetId;
     }
 
-    const apiauth = await sheets_helper.authenticate();
+    const apiauth = await sheets_helper.authenticateServiceAccount(
+      functions.config().farmsmart.sheets.jsonauth
+    );
 
     console.log(`Processing worksheet ${sheetId}`);
 
@@ -84,7 +86,18 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     await Promise.all(scorePromises);
 
     console.log('Successfully processed spreadsheet');
-    response.status(200).send('OK');
+
+    // Caches successful upload for a short time
+    response.set('Cache-Control', 'private, max-age=300, s-maxage=600');
+    response.status(200).send(`
+      <html>
+        <body>
+          <h1>Score upload successful.</h1>
+          <p>Sheet: ${spreadsheet.title}</p>
+          <p>Fetch: ${new Date()}</p>
+        </body>
+      </html>
+    `);
   } catch (err) {
     console.log(err);
     response.status(500).send(`FAILED: ${err.name} - ${err.message}`);
