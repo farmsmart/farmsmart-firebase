@@ -152,3 +152,38 @@ $ firebase deploy --only functions:<name_of_cloud_function>
 # delete cloud functions if deleted form index.js
  firebase functions:delete <name_of_cloud_function> --region us-central1 --force
 ```
+
+## Firebase rules
+
+The `rules` directory contains the security definitions for accessing each of the Firebase repository and storage facilities
+
+### Writing rules
+
+Refer to the [Firebase documentation](https://firebase.google.com/docs/rules) for developing rules
+
+### Testing rules
+
+Firestore and Realtime Database can be tested locally using the Firebase emulators
+
+```bash
+# /rules
+firebase serve --only firestore,database
+npm test
+```
+
+Storage rules need to be tested using the [online simulator](https://firebase.google.com/docs/rules/simulator)
+
+Test configuration is defined in `jest.config.js`
+
+### Deploying rules
+
+```bash
+# full deploy of all services and rules
+firebase deploy
+
+# deploy an individual service
+firebase deploy --only firestore
+
+# deploy only the rules for a service
+firebase deploy --only firestore:rules
+```
