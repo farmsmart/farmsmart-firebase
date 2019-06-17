@@ -1,5 +1,5 @@
 const { validateSchema } = require('./validate_schema');
-const firestore = require('./firestore_repository');
+const firestore = require('../utils/firestore_repository');
 
 jest.mock('./firestore_repository');
 
