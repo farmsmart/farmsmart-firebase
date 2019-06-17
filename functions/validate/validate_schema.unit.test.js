@@ -1,7 +1,8 @@
 const { validateSchema } = require('./validate_schema');
 const firestore = require('../utils/firestore_repository');
+const validDocument = require('../model/json/crop.sample.json');
 
-jest.mock('./firestore_repository');
+jest.mock('../utils/firestore_repository');
 
 describe('Validate schema', () => {
   afterAll(() => {
@@ -26,14 +27,6 @@ describe('Validate schema', () => {
     expect(() => validateSchema(noSchemaDocument)).toThrow();
   });
 });
-
-const validDocument = {
-  _fl_meta_: {
-    schema: 'crop',
-  },
-  name: 'tomato',
-  status: 'PUBLISHED',
-};
 
 const invalidDocument = {
   _fl_meta_: {

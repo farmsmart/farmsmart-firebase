@@ -1,5 +1,5 @@
 const Ajv = require('ajv');
-const firestore = require('./firestore_repository');
+const firestore = require('../utils/firestore_repository');
 
 const ajv = Ajv({ allErrors: true });
 
@@ -17,7 +17,7 @@ function validateSchema(data) {
 
 function validateJsonSchema(schemaName, json) {
   try {
-    const schemaPath = `../schemas/${schemaName}.schema.json`;
+    const schemaPath = `../model/schemas/${schemaName}.schema.json`;
     const schema = require(schemaPath);
     return ajv.validate(schema, json);
   } catch (err) {
