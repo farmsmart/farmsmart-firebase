@@ -7,6 +7,7 @@
     "test": "jest --detectOpenHandles --coverage --silent --reporters=\"jest-dot-reporter\"",
     "test:watch": "jest --watch --silent",
     "test:ci": "jest --ci --runInBand --coverage --verbose --reporters=\"default\" --reporters=\"jest-junit\"",
+    "test:debug": "jest --watch --verbose false",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
@@ -19,6 +20,7 @@
     "outputName": "results.xml"
   },
   "dependencies": {
+    "@slack/web-api": "^5.0.1",
     "ajv": "^6.10.0",
     "camelcase": "^5.3.1",
     "crypto": "^1.0.1",

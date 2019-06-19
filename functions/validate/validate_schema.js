@@ -1,27 +1,36 @@
 const Ajv = require('ajv');
 const firestore = require('../utils/firestore_repository');
+const slack = require('../utils/slack_alert');
+const fs = require('fs');
+const path = require('path');
 
 const ajv = Ajv({ allErrors: true });
 
 function validateSchema(data) {
   const { schema, fl_id } = data._fl_meta_;
 
-  if (validateJsonSchema(schema, data)) {
-    console.log(`Schema validation - doc: ${fl_id}, schema: ${schema}, result: PASSED`);
+  const jsonSchema = getSchema(schema);
+  const valid = ajv.validate(jsonSchema, data);
+  const msg = `Schema validation - doc: ${fl_id}, schema: ${schema}, result: `;
+
+  if (valid) {
+    console.log(`${msg} PASSED`);
     return firestore.deleteDocument('fs_content_errors', fl_id);
   } else {
-    console.log(`Schema validation - doc: ${fl_id}, schema: ${schema}, result: FAILED`);
+    console.log(`${msg} FAILED`);
+    slack.post(`${msg} FAILED`);
     return firestore.writeDocument('fs_content_errors', fl_id, getContentError(data));
   }
 }
 
-function validateJsonSchema(schemaName, json) {
-  try {
-    const schemaPath = `../model/schemas/${schemaName}.schema.json`;
-    const schema = require(schemaPath);
-    return ajv.validate(schema, json);
-  } catch (err) {
-    throw new Error(`Could not find schema. Schema: ${schemaName}`);
+function getSchema(schema) {
+  const filepath = path.resolve(__dirname, `../model/schemas/${schema}.schema.json`);
+  if (fs.existsSync(filepath)) {
+    return JSON.parse(fs.readFileSync(filepath, 'utf8'));
+  } else {
+    const msg = `Could not find schema. Schema: ${schema}`;
+    slack.post(msg);
+    throw new Error(msg);
   }
 }
 
