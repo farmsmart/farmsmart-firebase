@@ -1,7 +1,10 @@
 const { validateSchema } = require('./validate_schema');
-const firestore = require('./firestore_repository');
+const firestore = require('../utils/firestore_repository');
+const validDocument = require('../model/json/crop.sample.json');
+const slack = require('../utils/slack_alert');
 
-jest.mock('./firestore_repository');
+jest.mock('../utils/firestore_repository');
+jest.mock('../utils/slack_alert');
 
 describe('Validate schema', () => {
   afterAll(() => {
@@ -17,7 +20,12 @@ describe('Validate schema', () => {
     expect(firestore.writeDocument).toBeCalled();
   });
 
-  it('should delete existing error log if validaiton passes', () => {
+  it('should post a slack alert if validation fails', () => {
+    validateSchema(invalidDocument);
+    expect(slack.post).toBeCalled();
+  });
+
+  it('should delete existing error log if validation passes', () => {
     validateSchema(validDocument);
     expect(firestore.deleteDocument).toBeCalled();
   });
@@ -25,15 +33,15 @@ describe('Validate schema', () => {
   it('should throw an error if no JSON schema is found', () => {
     expect(() => validateSchema(noSchemaDocument)).toThrow();
   });
-});
 
-const validDocument = {
-  _fl_meta_: {
-    schema: 'crop',
-  },
-  name: 'tomato',
-  status: 'PUBLISHED',
-};
+  it('should post a slack alert if no JSON schema is found', () => {
+    try {
+      validateSchema(noSchemaDocument);
+    } catch (error) {
+      expect(slack.post).toBeCalled();
+    }
+  });
+});
 
 const invalidDocument = {
   _fl_meta_: {

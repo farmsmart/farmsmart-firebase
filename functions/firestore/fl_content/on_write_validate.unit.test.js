@@ -1,6 +1,6 @@
 const admin = require('firebase-admin');
 const test = require('firebase-functions-test')();
-const validation = require('../../utils/validate_schema');
+const validation = require('../../validate/validate_schema');
 const firestore = require('../../utils/firestore_repository');
 
 describe('fl_content On Write', () => {

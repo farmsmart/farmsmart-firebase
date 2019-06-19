@@ -4,8 +4,9 @@ module.exports = {
   testMatch: [
     '**/firestore/**/*unit.test.js',
     '**/https/**/*unit.test.js',
-    '**/utils/**/*unit.test.js',
     '**/score/**/*unit.test.js',
+    '**/utils/**/*unit.test.js',
+    '**/validate/**/*unit.test.js',
   ],
   testPathIgnorePatterns: ['/node_modules/'],
   testEnvironment: 'node',

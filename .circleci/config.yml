@@ -12,6 +12,10 @@ jobs:
     working_directory: /tmp/workspace/farmsmart
     steps:
       - checkout
+      - run:
+          name: "pull submodules"
+          command: |
+            git submodule update --init --recursive
       - restore_cache:
           key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
       - run:
@@ -59,6 +63,7 @@ jobs:
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
+            npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
 
             echo "deploy"
             echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${SECRETS_DIR}/auth.json
