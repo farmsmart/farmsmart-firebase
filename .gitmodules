@@ -1,4 +1,0 @@
-[submodule "functions/model"]
-	path = functions/model
-	url = https://github.com/farmsmart/farmsmart-model.git
-	branch = master
