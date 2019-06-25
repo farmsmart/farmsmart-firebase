@@ -15,7 +15,7 @@ jobs:
       - run:
           name: "pull submodules"
           command: |
-            git submodule update --remote
+            git submodule update --init --recursive --remote
       - restore_cache:
           key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
       - run:
