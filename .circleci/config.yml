@@ -51,7 +51,7 @@ jobs:
   test:
     executor: node-executor
     steps:
-      - *attach_workspace
+      - *restore_workspace
       - run:
           working_directory: *functions_dir
           name: code base lint
@@ -64,7 +64,7 @@ jobs:
   deploy:
     executor: node-executor
     steps:
-      - *attach_workspace
+      - *restore_workspace
       - run:
           working_directory: *functions_dir
           name: Deploy to firebase project
