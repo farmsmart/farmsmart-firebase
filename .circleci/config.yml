@@ -100,7 +100,8 @@ workflows:
       - deploy:
           # Deploys feature branches to gcp project
           name: deploy-gcp-feature
-          context: gcp-feature
+          # context: gcp-feature
+          context: gcp-dev
           requires:
             - test
           filters:
