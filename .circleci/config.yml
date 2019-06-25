@@ -70,12 +70,12 @@ jobs:
           name: Deploy to firebase project
           command: |
             echo "Check required environment variables"
-            [ -z "$FIREBASE_TOKEN" ] && exit 10001
-            [ -z "$FIREBASE_PROJECT" ] && exit 10002
-            [ -z "$SHEETS_SERVICE_ACCOUNT" ] && exit 10003
-            [ -z "$SHEETS_API_KEY" ] && exit 10004
-            [ -z "$SCORE_DOC_ID" ] && exit 10005
-            [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 10006
+            [ -z "$FIREBASE_TOKEN" ] && exit 1
+            [ -z "$FIREBASE_PROJECT" ] && exit 2
+            [ -z "$SHEETS_SERVICE_ACCOUNT" ] && exit 3
+            [ -z "$SHEETS_API_KEY" ] && exit 4
+            [ -z "$SCORE_DOC_ID" ] && exit 5
+            [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 6
 
             secrets_dir=./.credentials
             mkdir -p ${secrets_dir}
