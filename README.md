@@ -19,7 +19,7 @@ $ npm install -g firebase-tools
 ```
 
 3. Checkout the source code
-4. Pull submodules to get model info `git submodule update --remote`
+4. Pull submodules to get model info `git submodule update --init --recursive --remote`
 5. Change directory into `functions` directory and run install
 
 ```bash
