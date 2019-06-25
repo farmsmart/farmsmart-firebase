@@ -2,7 +2,7 @@
   "name": "functions",
   "description": "Cloud Functions for Firebase",
   "scripts": {
-    "prettier": "pretty-quick --pattern **/firestore/**/*.js --pattern **/utils/**/*.js",
+    "prettier": "pretty-quick --pattern functions/**/firestore/**/*.js --pattern functions/**/utils/**/*.js",
     "lint": "eslint .",
     "test": "jest --detectOpenHandles --coverage --silent --reporters=\"jest-dot-reporter\"",
     "test:watch": "jest --watch --silent",

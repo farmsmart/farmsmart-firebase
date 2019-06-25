@@ -1,15 +1,31 @@
 version: 2.1
 
+references: 
+  working_dir: &working_dir /tmp/workspace/farmsmart
+  
+  functions_dir: &functions_dir /tmp/workspace/farmsmart/functions
+
+  workspace: &workspace /tmp/workspace
+
+  restore_workspace: &restore_workspace
+    attach_workspace:
+      at: *workspace
+
+  save_workspace: &save_workspace
+    persist_to_workspace:
+      root: *workspace
+      paths:
+        - farmsmart
+
 executors:
   node-executor:
     docker:
       - image: circleci/node:8.15.1-stretch-browsers-legacy
-    working_directory: /tmp/workspace
+    working_directory: *working_dir
 
 jobs:
   build:
     executor: node-executor
-    working_directory: /tmp/workspace/farmsmart
     steps:
       - checkout
       - run:
@@ -19,28 +35,25 @@ jobs:
       - restore_cache:
           key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
+          working_directory: *functions_dir
           name: update firebase
           command: npm install firebase-admin@latest firebase-functions@latest
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
+          working_directory: *functions_dir
           name: install app dependencies
           command: npm install
       - save_cache:
           key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
           paths:
             - /tmp/workspace/farmsmart/functions/node_modules
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - farmsmart
+      - *save_workspace
+    
   test:
     executor: node-executor
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
+      - *attach_workspace
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
+          working_directory: *functions_dir
           name: code base lint
           command: |
             npm run-script lint
@@ -51,14 +64,21 @@ jobs:
   deploy:
     executor: node-executor
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
+      - *attach_workspace
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: deploy firebase
+          working_directory: *functions_dir
+          name: Deploy to firebase project
           command: |
-            SECRETS_DIR=./.credentials
-            mkdir -p ${SECRETS_DIR}
+            echo "Check required environment variables"
+            [ -z "$FIREBASE_TOKEN" ] && exit 1
+            [ -z "$FIREBASE_PROJECT" ] && exit 1
+            [ -z "$SHEETS_SERVICE_ACCOUNT" ] && exit 1
+            [ -z "$SHEETS_API_KEY" ] && exit 1
+            [ -z "$SCORE_DOC_ID" ] && exit 1
+            [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 1
+
+            secrets_dir=./.credentials
+            mkdir -p ${secrets_dir}
             echo "Set firebase project config"
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
@@ -66,8 +86,7 @@ jobs:
             npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
 
             echo "deploy"
-            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${SECRETS_DIR}/auth.json
-            file /tmp/workspace/farmsmart/functions/.credentials/auth.json
+            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/auth.json
             npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
 workflows:
@@ -79,9 +98,9 @@ workflows:
           requires:
             - build
       - deploy:
-          # Uses a context that encapsulates firebase login and project for dev env
-          name: deploy-to-dev
-          context: farmsmart_dev
+          # Deploys feature branches to gcp project
+          name: deploy-gcp-feature
+          context: gcp-feature
           requires:
             - test
           filters:
@@ -89,12 +108,32 @@ workflows:
               only:
                 - /feature.*/
       - deploy:
-          # Uses a context that encapsulates firebase login and project for pre-prod env
-          name: deploy-to-preprod
-          context: farmsmart_pre_prod
+          # Deploys develop branch to gcp project
+          name: deploy-gcp-dev
+          context: gcp-dev
           requires:
             - test
           filters:
             branches:
               only:
                 - develop
+      - deploy:
+          # Deploys release branches to gcp project
+          name: deploy-gcp-stage
+          context: gcp-stage
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - /release.*/
+      - deploy:
+          # Deploys master to gcp project
+          name: deploy-gcp-prod
+          context: gcp-prod
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - master
