@@ -22,39 +22,37 @@ executors:
     docker:
       - image: circleci/node:8.15.1-stretch-browsers-legacy
     working_directory: *working_dir
+  farmsmart-executor:
+    docker:
+      - image: farmsmart/gcp-firebase:1.0.0
+    working_directory: *working_dir
 
 jobs:
   build:
-    executor: node-executor
+    executor: farmsmart-executor
     steps:
       - checkout
       - run:
           name: "pull submodules"
           command: |
             git submodule update --init --recursive --remote
-      - restore_cache:
-          key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
       - run:
           working_directory: *functions_dir
           name: update firebase
           command: npm install firebase-admin@latest firebase-functions@latest
       - run:
-          working_directory: *functions_dir
-          name: install app dependencies
+          working_directory: *working_dir
+          name: install dependencies
           command: npm install
-      - save_cache:
-          key: dependency-cache-{{ .Branch }}-{{ checksum "/tmp/workspace/farmsmart/functions/package.json" }}
-          paths:
-            - /tmp/workspace/farmsmart/functions/node_modules
       - *save_workspace
     
   test:
-    executor: node-executor
+    executor: farmsmart-executor
     steps:
       - *restore_workspace
       - run:
           working_directory: *functions_dir
-          name: code base lint
+          name: Run unit tests on cloud functions
           command: |
             npm run-script lint
             npm run-script test:ci
@@ -62,11 +60,10 @@ jobs:
           path: /tmp/workspace/farmsmart/functions/reports
 
   deploy:
-    executor: node-executor
+    executor: farmsmart-executor
     steps:
       - *restore_workspace
       - run:
-          working_directory: *functions_dir
           name: Deploy to firebase project
           command: |
             echo "Check required environment variables"
@@ -77,17 +74,24 @@ jobs:
             [ -z "$SCORE_DOC_ID" ] && exit 5
             [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 6
 
-            secrets_dir=./.credentials
+            secrets_dir=/tmp/workspace/farmsmart/functions/.credentials
             mkdir -p ${secrets_dir}
             echo "Set firebase project config"
-            npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
-            npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
-            npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
-            npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
+            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
+            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
+            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
+            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
+
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
 
             echo "deploy"
             echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/auth.json
-            npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
+            # npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
+
+            firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
 workflows:
   version: 2
@@ -100,8 +104,7 @@ workflows:
       - deploy:
           # Deploys feature branches to gcp project
           name: deploy-gcp-feature
-          # context: gcp-feature
-          context: gcp-dev
+          context: gcp-feature
           requires:
             - test
           filters:
