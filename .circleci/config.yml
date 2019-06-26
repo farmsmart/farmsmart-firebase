@@ -5,7 +5,7 @@ references:
   
   functions_dir: &functions_dir /tmp/workspace/farmsmart/functions
 
-  functions_dir: &rules_dir /tmp/workspace/farmsmart/rules
+  rules_dir: &rules_dir /tmp/workspace/farmsmart/rules
 
   workspace: &workspace /tmp/workspace
 
