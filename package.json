@@ -1,0 +1,7 @@
+{
+  "name": "farmsmart-firebase",
+  "description": "Firebase services for FarmSmart",
+  "scripts": {
+    "postinstall": "cd functions && npm install && cd.. && cd rules && npm install && cd.."
+  }
+}
