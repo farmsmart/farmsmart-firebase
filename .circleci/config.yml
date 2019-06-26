@@ -18,10 +18,6 @@ references:
         - farmsmart
 
 executors:
-  node-executor:
-    docker:
-      - image: circleci/node:8.15.1-stretch-browsers-legacy
-    working_directory: *working_dir
   farmsmart-executor:
     docker:
       - image: farmsmart/gcp-firebase:1.0.0
@@ -38,8 +34,9 @@ jobs:
             git submodule update --init --recursive --remote
       - run:
           working_directory: *functions_dir
-          name: update firebase
-          command: npm install firebase-admin@latest firebase-functions@latest
+          name: update firebase cloud functions library
+          command: | 
+            npm install firebase-admin@latest firebase-functions@latest
       - run:
           working_directory: *working_dir
           name: install dependencies
@@ -64,9 +61,8 @@ jobs:
     steps:
       - *restore_workspace
       - run:
-          name: Deploy to firebase project
+          name: Check required parameters are present
           command: |
-            echo "Check required environment variables"
             [ -z "$FIREBASE_TOKEN" ] && exit 1
             [ -z "$FIREBASE_PROJECT" ] && exit 2
             [ -z "$SHEETS_SERVICE_ACCOUNT" ] && exit 3
@@ -74,23 +70,31 @@ jobs:
             [ -z "$SCORE_DOC_ID" ] && exit 5
             [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 6
 
-            secrets_dir=/tmp/workspace/farmsmart/functions/.credentials
-            mkdir -p ${secrets_dir}
-            echo "Set firebase project config"
-            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
-            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
-            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
-            #npm run --silent set:config -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
+            # ensure firebase is the latest
+            npm install -g firebase-tools
 
+      - run:
+          working_directory: *functions_dir
+          name: Inject credential for spreadsheet user
+          command: |
+            secrets_dir='.credentials'
+            mkdir -p ${secrets_dir}
+            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/auth.json
+
+      - run:
+          working_directory: *working_dir
+          name: Deploy to firebase project
+          command: |
+            
+            echo "Set firebase project cloud function configs"
+            
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.jsonauth="auth.json"
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
 
-            echo "deploy"
-            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/auth.json
-            # npm run --silent deploy -- --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
-
+            echo "Deploy all FireBase artifacts (cloud functions, rules, hosting)"
+            
             firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
 workflows:
