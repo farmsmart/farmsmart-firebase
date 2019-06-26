@@ -5,6 +5,8 @@ references:
   
   functions_dir: &functions_dir /tmp/workspace/farmsmart/functions
 
+  functions_dir: &rules_dir /tmp/workspace/farmsmart/rules
+
   workspace: &workspace /tmp/workspace
 
   restore_workspace: &restore_workspace
@@ -53,6 +55,11 @@ jobs:
           command: |
             npm run-script lint
             npm run-script test:ci
+      - run:
+          working_directory: *rules_dir
+          name: Run unit tests for the rules
+          command: |
+            npm run-script test
       - store_test_results:
           path: /tmp/workspace/farmsmart/functions/reports
 
