@@ -22,7 +22,7 @@ references:
 executors:
   farmsmart-executor:
     docker:
-      - image: farmsmart/gcp-firebase:1.0.0
+      - image: farmsmart/gcp-firebase:gcloud252-node10-firebase7.0.2
     working_directory: *working_dir
 
 jobs:
