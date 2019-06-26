@@ -102,11 +102,11 @@ jobs:
     executor: farmsmart-executor
     steps:
       - run:
-        name: Test integration of spreadsheets
-        command: | 
-          set -euo pipefail
+          name: Test integration of spreadsheets
+          command: | 
+            set -euo pipefail
 
-          curl --silent $BULKUPLOAD_URL | grep -v FAILED
+            curl --silent $BULKUPLOAD_URL | grep -v FAILED
 
 workflows:
   version: 2
