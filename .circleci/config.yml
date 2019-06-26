@@ -83,6 +83,8 @@ jobs:
             [ -z "$SCORE_DOC_ID" ] && exit 5
             [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 6
 
+            echo "Ready to deploy"
+
       - run:
           working_directory: *functions_dir
           name: Inject credential for spreadsheet user
