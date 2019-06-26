@@ -19,7 +19,7 @@ exports.createLinkIfScoreExists = async function(
     console.log(`Creating crop link: ${cropName} to ${cmsDocId} in ${linksRef.path} `);
     await linksRef
       .doc(cmsDocId)
-      .set({ crop: cropName, cmsCropId: cmsDocId, locale: cmsLocale, env: cmsEnvironment });
+      .set({ cropName: cropName, cmsCropId: cmsDocId, locale: cmsLocale, env: cmsEnvironment });
   }
 };
 

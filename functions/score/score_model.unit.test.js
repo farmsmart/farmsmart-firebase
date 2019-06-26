@@ -92,7 +92,7 @@ describe('Score Model', () => {
 
       let crop = data.crop;
       expected(crop)
-        .to.have.property('title')
+        .to.have.property('name')
         .equals('TEST CROP');
       expected(crop).to.have.property('dataHash');
 
