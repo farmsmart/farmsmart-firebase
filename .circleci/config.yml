@@ -34,15 +34,20 @@ jobs:
           name: "pull submodules"
           command: |
             git submodule update --init --recursive --remote
+      
       - run:
           working_directory: *functions_dir
-          name: update firebase cloud functions library
+          name: Install dependencies for cloud function
           command: | 
             npm install firebase-admin@latest firebase-functions@latest
+            npm install
+
       - run:
-          working_directory: *working_dir
-          name: install dependencies
-          command: npm install
+          working_directory: *rules_dir
+          name: Install dependencies for rules
+          command: |
+            npm install
+
       - *save_workspace
     
   test:
