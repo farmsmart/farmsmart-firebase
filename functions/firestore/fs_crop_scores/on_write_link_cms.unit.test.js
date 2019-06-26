@@ -56,7 +56,7 @@ describe('fs_crop_scores On Write', () => {
       isDelete: true,
       doc: {
         crop: {
-          title: 'Tomato',
+          name: 'Tomato',
         },
       },
     });
@@ -94,7 +94,7 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          title: 'Tomato',
+          name: 'Tomato',
         },
       },
     });
@@ -138,7 +138,7 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          title: 'Tomato',
+          name: 'Tomato',
         },
       },
     });
