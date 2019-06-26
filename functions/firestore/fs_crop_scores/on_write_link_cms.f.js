@@ -31,7 +31,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
   if (scoreChange.isDelete) {
     await db
       .collection('fs_crop_score_cms_link')
-      .where('crop', '==', scoreChange.doc.crop.name)
+      .where('cropName', '==', scoreChange.doc.crop.name)
       .get()
       .then(link => {
         link.forEach(async snapshot => {
