@@ -98,6 +98,16 @@ jobs:
             
             firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
+  integration:
+    executor: farmsmart-executor
+    steps:
+      - run:
+        name: Test integration of spreadsheets
+        command: | 
+          set -euo pipefail
+
+          curl --silent $BULKUPLOAD_URL | grep -v FAILED
+
 workflows:
   version: 2
   backend:
@@ -146,3 +156,27 @@ workflows:
             branches:
               only:
                 - master
+
+      - integration:
+          name: int-feature
+          context: gcp-feature
+          requires:
+            - deploy-gcp-feature
+
+      - integration:
+          name: int-dev
+          context: gcp-dev
+          requires:
+            - deploy-gcp-dev
+
+      - integration:
+          name: int-stage
+          context: gcp-stage
+          requires:
+            - deploy-gcp-stage
+
+      - integration:
+          name: int-prod
+          context: gcp-prod
+          requires:
+            - deploy-gcp-prod

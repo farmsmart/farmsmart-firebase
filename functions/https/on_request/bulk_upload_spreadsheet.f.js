@@ -57,18 +57,18 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       return Promise.resolve(result);
     };
     const writeScoreToFireStore = scoreData => {
-      if (!scoreData.crop.title) {
+      if (!scoreData.crop.name) {
         return Promise.reject(new Error(`Transformed document is invalid`));
       } else {
-        let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.title);
+        let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.name);
         return db.runTransaction(tx => {
-          console.log(`Writing crop score to FireStore: ${scoreData.crop.title}`);
+          console.log(`Writing crop score to FireStore: ${scoreData.crop.name}`);
           let meta = {};
           meta.spreadsheetId = sheetId;
           meta.updated = score_repository.createDate(new Date());
           scoreData.meta = meta;
           tx.set(scoreRef, scoreData, { merge: true });
-          return Promise.resolve(scoreData.crop.title);
+          return Promise.resolve(scoreData.crop.name);
         });
       }
     };
