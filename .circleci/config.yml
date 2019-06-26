@@ -82,9 +82,6 @@ jobs:
             [ -z "$SCORE_DOC_ID" ] && exit 5
             [ -z "$SLACK_FARMSMART_TOKEN" ] && exit 6
 
-            # ensure firebase is the latest
-            npm install -g firebase-tools
-
       - run:
           working_directory: *functions_dir
           name: Inject credential for spreadsheet user
