@@ -20,14 +20,15 @@ references:
         - farmsmart
 
 executors:
-  farmsmart-executor:
+  gcp-firebase:
     docker:
-      - image: farmsmart/gcp-firebase:gcloud252-node10-firebase7.0.2
+      - image: farmsmart/gcp-firebase
     working_directory: *working_dir
+  
 
 jobs:
   build:
-    executor: farmsmart-executor
+    executor: gcp-firebase
     steps:
       - checkout
       - run:
@@ -51,7 +52,7 @@ jobs:
       - *save_workspace
     
   test:
-    executor: farmsmart-executor
+    executor: gcp-firebase
     steps:
       - *restore_workspace
       - run:
@@ -70,7 +71,7 @@ jobs:
           path: /tmp/workspace/farmsmart/functions/reports
 
   deploy:
-    executor: farmsmart-executor
+    executor: gcp-firebase
     steps:
       - *restore_workspace
 
@@ -99,7 +100,7 @@ jobs:
             firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
   integration:
-    executor: farmsmart-executor
+    executor: gcp-firebase
     steps:
       - run:
           name: Test integration of score engine
