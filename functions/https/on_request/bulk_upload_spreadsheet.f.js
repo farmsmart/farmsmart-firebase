@@ -19,13 +19,10 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
   try {
     const apiKey = functions.config().farmsmart.sheets.api.key;
 
-    // Retrieve the spreadsheet information either from default
-    //  or a different spreadsheet.
-    let sheetId;
-    if (!request.query.sheetId) {
-      sheetId = functions.config().farmsmart.scorematrix.doc.id;
-    } else {
-      sheetId = request.query.sheetId;
+    // Simple check to ensure that sheetId is the same as the configured sheet
+    let sheetId = request.query.sheetId;
+    if (!request.query.sheetId || sheetId != functions.config().farmsmart.scorematrix.doc.id) {
+      throw 'Missing or Invalid spreadsheet';
     }
 
     const apiauth = await sheets_helper.authenticateServiceAccount();
