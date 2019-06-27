@@ -21,7 +21,7 @@ describe('Transform Score', () => {
       expected(data).to.have.property('crop');
       let crop = data.crop;
       expected(crop)
-        .to.have.property('title')
+        .to.have.property('name')
         .equals('Okra');
       expected(crop).to.have.property('dataHash');
 

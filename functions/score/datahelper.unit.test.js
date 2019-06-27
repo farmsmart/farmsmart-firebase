@@ -41,20 +41,20 @@ describe('datahelper', () => {
     });
     test('should return true when both documents are valid and not equal', () => {
       let score = datahelper.getScoreChange(
-        { crop: { dataHash: 'A12', title: 'B', values: { extra: true } } },
-        { crop: { dataHash: 'A12', title: 'B', values: {} } }
+        { crop: { dataHash: 'A12', name: 'B', values: { extra: true } } },
+        { crop: { dataHash: 'A12', name: 'B', values: {} } }
       );
-      expected(score, 'same title and dataHash').has.property('isChange').is.false;
+      expected(score, 'same name and dataHash').has.property('isChange').is.false;
       score = datahelper.getScoreChange(
-        { crop: { dataHash: 'A12', title: 'A', values: { one: 1 } } },
-        { crop: { dataHash: 'B34', title: 'A', values: {} } }
+        { crop: { dataHash: 'A12', name: 'A', values: { one: 1 } } },
+        { crop: { dataHash: 'B34', name: 'A', values: {} } }
       );
       expected(score, 'difference in dataHash').has.property('isChange').is.true;
       score = datahelper.getScoreChange(
-        { crop: { dataHash: 'A12', title: 'C', values: { one: 1 } } },
-        { crop: { dataHash: 'A12', title: 'A', values: {} } }
+        { crop: { dataHash: 'A12', name: 'C', values: { one: 1 } } },
+        { crop: { dataHash: 'A12', name: 'A', values: {} } }
       );
-      expected(score, 'difference in title').has.property('isChange').is.true;
+      expected(score, 'difference in name').has.property('isChange').is.true;
     });
   });
   describe('getCmsCropChange', () => {

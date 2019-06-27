@@ -48,6 +48,11 @@ describe('htts On Request upload spreadsheet', () => {
             key: 'KEY',
           },
         },
+        scorematrix: {
+          doc: {
+            id: 'SHEET-ID',
+          },
+        },
       },
     });
 

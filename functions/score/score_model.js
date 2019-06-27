@@ -2,7 +2,7 @@ const crypto = require('crypto');
 
 const crop_constants = {
   PROP_CROP: 'crop',
-  PROP_CROP_TITLE: 'title',
+  PROP_CROP_TITLE: 'name',
   PROP_HASH: 'dataHash',
   PROP_SCORES: 'scores',
   PROP_FACTOR: 'factor',

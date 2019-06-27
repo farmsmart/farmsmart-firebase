@@ -19,18 +19,13 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
   try {
     const apiKey = functions.config().farmsmart.sheets.api.key;
 
-    // Retrieve the spreadsheet information either from default
-    //  or a different spreadsheet.
-    let sheetId;
-    if (!request.query.sheetId) {
-      sheetId = functions.config().farmsmart.scorematrix.doc.id;
-    } else {
-      sheetId = request.query.sheetId;
+    // Simple check to ensure that sheetId is the same as the configured sheet
+    let sheetId = request.query.sheetId;
+    if (!request.query.sheetId || sheetId != functions.config().farmsmart.scorematrix.doc.id) {
+      throw Error('Missing or Invalid spreadsheet');
     }
 
-    const apiauth = await sheets_helper.authenticateServiceAccount(
-      functions.config().farmsmart.sheets.jsonauth
-    );
+    const apiauth = await sheets_helper.authenticateServiceAccount();
 
     console.log(`Processing worksheet ${sheetId}`);
 
@@ -59,18 +54,18 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       return Promise.resolve(result);
     };
     const writeScoreToFireStore = scoreData => {
-      if (!scoreData.crop.title) {
+      if (!scoreData.crop.name) {
         return Promise.reject(new Error(`Transformed document is invalid`));
       } else {
-        let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.title);
+        let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.name);
         return db.runTransaction(tx => {
-          console.log(`Writing crop score to FireStore: ${scoreData.crop.title}`);
+          console.log(`Writing crop score to FireStore: ${scoreData.crop.name}`);
           let meta = {};
           meta.spreadsheetId = sheetId;
           meta.updated = score_repository.createDate(new Date());
           scoreData.meta = meta;
           tx.set(scoreRef, scoreData, { merge: true });
-          return Promise.resolve(scoreData.crop.title);
+          return Promise.resolve(scoreData.crop.name);
         });
       }
     };

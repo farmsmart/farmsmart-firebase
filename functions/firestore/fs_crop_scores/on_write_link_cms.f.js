@@ -31,7 +31,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
   if (scoreChange.isDelete) {
     await db
       .collection('fs_crop_score_cms_link')
-      .where('crop', '==', scoreChange.doc.crop.title)
+      .where('cropName', '==', scoreChange.doc.crop.name)
       .get()
       .then(link => {
         link.forEach(async snapshot => {
@@ -40,7 +40,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
         return Promise.resolve(true);
       });
   } else if (scoreChange.isInsert) {
-    let cropName = scoreChange.doc.crop.title;
+    let cropName = scoreChange.doc.crop.name;
     const main = await db
       .collection('fl_content')
       .where('_fl_meta_.locale', '==', 'en-US')

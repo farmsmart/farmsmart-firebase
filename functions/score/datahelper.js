@@ -28,7 +28,7 @@ exports.getScoreChange = function(current, previous) {
   if (
     !scoreChange.isInsert &&
     !scoreChange.isDelete &&
-    (current.crop.dataHash !== previous.crop.dataHash || current.crop.title !== previous.crop.title)
+    (current.crop.dataHash !== previous.crop.dataHash || current.crop.name !== previous.crop.name)
   ) {
     scoreChange.isChange = true;
     scoreChange.isScoreUpdated = true;

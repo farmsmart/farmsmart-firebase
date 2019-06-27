@@ -56,7 +56,7 @@ describe('fs_crop_scores On Write', () => {
       isDelete: true,
       doc: {
         crop: {
-          title: 'Tomato',
+          name: 'Tomato',
         },
       },
     });
@@ -83,7 +83,7 @@ describe('fs_crop_scores On Write', () => {
     expect(fs).toBeCalled();
     expect(collectionMock).toHaveBeenCalledTimes(2);
     expect(queryMock).toHaveBeenCalledTimes(1);
-    expect(queryMock).toHaveBeenCalledWith('crop', '==', 'Tomato');
+    expect(queryMock).toHaveBeenCalledWith('cropName', '==', 'Tomato');
     expect(deleteLink).toHaveBeenCalledTimes(1);
     done();
   });
@@ -94,7 +94,7 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          title: 'Tomato',
+          name: 'Tomato',
         },
       },
     });
@@ -138,7 +138,7 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          title: 'Tomato',
+          name: 'Tomato',
         },
       },
     });
