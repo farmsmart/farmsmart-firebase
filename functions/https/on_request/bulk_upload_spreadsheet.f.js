@@ -22,7 +22,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     // Simple check to ensure that sheetId is the same as the configured sheet
     let sheetId = request.query.sheetId;
     if (!request.query.sheetId || sheetId != functions.config().farmsmart.scorematrix.doc.id) {
-      throw 'Missing or Invalid spreadsheet';
+      throw Error('Missing or Invalid spreadsheet');
     }
 
     const apiauth = await sheets_helper.authenticateServiceAccount();
