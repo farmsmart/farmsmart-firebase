@@ -102,11 +102,11 @@ jobs:
     executor: farmsmart-executor
     steps:
       - run:
-          name: Test integration of spreadsheets
+          name: Test integration of score engine
           command: | 
             set -euo pipefail
 
-            curl --silent $BULKUPLOAD_URL | grep -v FAILED
+            curl --silent "${BULKUPLOAD_URL}?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
 
 workflows:
   version: 2
@@ -158,25 +158,25 @@ workflows:
                 - master
 
       - integration:
-          name: int-feature
+          name: it-feature
           context: gcp-feature
           requires:
             - deploy-gcp-feature
 
       - integration:
-          name: int-dev
+          name: it-dev
           context: gcp-dev
           requires:
             - deploy-gcp-dev
 
       - integration:
-          name: int-stage
+          name: it-stage
           context: gcp-stage
           requires:
             - deploy-gcp-stage
 
       - integration:
-          name: int-prod
+          name: it-prod
           context: gcp-prod
           requires:
             - deploy-gcp-prod
