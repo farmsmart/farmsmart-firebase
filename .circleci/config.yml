@@ -72,10 +72,10 @@ jobs:
     steps:
       - *restore_workspace
       - run: 
-          name: Start firestore in background
+          name: Start firestore emulator in the background
           background: true
           command: |
-            firestore serve --only firestore
+            firebase serve --only firestore
       - run:
           working_directory: *rules_dir
           name: Run rules unit test 
