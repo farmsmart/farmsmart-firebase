@@ -24,7 +24,10 @@ executors:
     docker:
       - image: farmsmart/gcp-firebase
     working_directory: *working_dir
-  
+  gcp-firebase-emulator:
+    docker:
+      - image: farmsmart/gcp-firebase-emulator
+    working_directory: *working_dir
 
 jobs:
   build:
@@ -65,13 +68,9 @@ jobs:
           path: /tmp/workspace/farmsmart/functions/reports
 
   test-rules:
-    executor: gcp-firebase
+    executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
-      - run:
-          name: Install the emulator
-          command: |
-            firebase setup:emulators:firestore
       - run:
           working_directory: *rules_dir
           name: Run rules 
