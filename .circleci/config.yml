@@ -71,10 +71,16 @@ jobs:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
+      - run: 
+          name: Start firestore in background
+          background: true
+          command: |
+            firestore serve --only firestore
       - run:
           working_directory: *rules_dir
           name: Run rules unit test 
           command: |
+            sleep 5
             npm run-script test
 
 
