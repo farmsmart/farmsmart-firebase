@@ -73,7 +73,7 @@ jobs:
       - *restore_workspace
       - run:
           working_directory: *rules_dir
-          name: Run rules 
+          name: Run rules unit test 
           command: |
             npm run-script test
 
