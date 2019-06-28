@@ -122,6 +122,9 @@ jobs:
           command: | 
             set -euo pipefail
 
+            # Dumb Check to ensure url is for the correct project
+            echo $BULKUPLOAD_URL | grep $FIREBASE_PROJECT
+
             curl --silent "${BULKUPLOAD_URL}?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
 
 workflows:
