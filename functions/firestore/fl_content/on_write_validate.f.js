@@ -10,12 +10,14 @@ try {
   // firebase already initialised
 }
 
+const errorPath = id => `fs_content_errors/${id}`;
+
 const validationFailed = (id, schema, errors) => {
-  return firestore.writeDocument('fs_content_errors', id, { schema: schema, errors: errors });
+  return firestore.writeDocument(errorPath(id), { schema: schema, errors: errors });
 };
 
 const validationPassed = id => {
-  return firestore.deleteDocument('fs_content_errors', id);
+  return firestore.deleteDocument(errorPath(id));
 };
 
 const alert = msg => {
@@ -36,15 +38,15 @@ const validateSchemaOnWrite = async change => {
       await alert(msg('FAILED'));
       throw Error(msg('FAILED'));
     } else {
-      console.log(msg);
-      return validationPassed(change.after.id, msg('PASSED'));
+      console.log(msg('PASSED'));
+      return validationPassed(change.after.id);
     }
   }
 };
 
 module.exports = functions.firestore.document('fl_content/{id}').onWrite((change, context) => {
   if (!change.after.exists) {
-    return firestore.deleteDocument('fs_content_errors', change.before.id);
+    return firestore.deleteDocument(errorPath(change.before.id));
   }
 
   return validateSchemaOnWrite(change);
