@@ -1,30 +1,28 @@
 const admin = require('firebase-admin');
 const test = require('firebase-functions-test')();
-const validation = require('../../validate/validate_schema');
+const validateSchema = require('../../validate/validate_schema');
 const firestore = require('../../utils/firestore_repository');
 
+jest.mock('../../utils/slack_alert');
+const validateSchemaSpy = jest.spyOn(validateSchema, 'validateSchema').mockImplementation(() => {});
+const deleteSpy = jest.spyOn(firestore, 'deleteDocument').mockImplementation(() => {});
+const writeSpy = jest.spyOn(firestore, 'writeDocument').mockImplementation(() => {});
+
 describe('fl_content On Write', () => {
-  let myFunctions, wrapped;
-  let validateStub, deleteDocumentStub;
+  const crop = {
+    _fl_meta_: { schema: 'crop' },
+    status: 'PUBLISHED',
+  };
   const snapBefore = test.firestore.exampleDocumentSnapshot();
-  const publishedSnapshot = test.makeChange(
-    snapBefore,
-    test.firestore.makeDocumentSnapshot({ status: 'PUBLISHED' })
-  );
-  const unPublishedSnapshot = test.makeChange(
-    snapBefore,
-    test.firestore.makeDocumentSnapshot({ status: 'DRAFT' })
-  );
-  const deletedSnapshot = test.makeChange(snapBefore, test.firestore.makeDocumentSnapshot({}));
+  const snapAfterPublished = test.firestore.makeDocumentSnapshot(crop);
+  const snapAfterDraft = test.firestore.makeDocumentSnapshot({ ...crop, status: 'DRAFT' });
+  const publishedChange = test.makeChange(snapBefore, snapAfterPublished);
+  const draftChange = test.makeChange(snapBefore, snapAfterDraft);
+  const deleteChange = test.makeChange(snapBefore, test.firestore.makeDocumentSnapshot({}));
 
-  beforeAll(() => {
-    jest.spyOn(admin, 'initializeApp').mockImplementation(() => {});
-    validateStub = jest.spyOn(validation, 'validateSchema').mockImplementation(() => {});
-    deleteDocumentStub = jest.spyOn(firestore, 'deleteDocument').mockImplementation(() => {});
-
-    myFunctions = require('../../index');
-    wrapped = test.wrap(myFunctions.firestoreFlContentOnWriteValidate);
-  });
+  jest.spyOn(admin, 'initializeApp').mockImplementation(() => {});
+  const { firestoreFlContentOnWriteValidate } = require('../../index');
+  const wrappedValidateSchemaOnWrite = test.wrap(firestoreFlContentOnWriteValidate);
 
   afterAll(() => {
     jest.restoreAllMocks();
@@ -35,23 +33,35 @@ describe('fl_content On Write', () => {
     jest.clearAllMocks();
   });
 
-  it('should validate schema for published content', () => {
-    wrapped(publishedSnapshot);
-    expect(validateStub).toBeCalled();
+  it('should validate schema for published content', async () => {
+    await wrappedValidateSchemaOnWrite(publishedChange);
+    expect(validateSchemaSpy).toBeCalled();
   });
 
-  it('should not validate schema for unpublished content', () => {
-    wrapped(unPublishedSnapshot);
-    expect(validateStub).not.toBeCalled();
+  it('should remove an existing error log for a valid document', async () => {
+    await wrappedValidateSchemaOnWrite(publishedChange);
+    expect(deleteSpy).toBeCalled();
   });
 
-  it('should remove unpublished content from the error log', () => {
-    wrapped(unPublishedSnapshot);
-    expect(deleteDocumentStub).toBeCalled();
+  it('should not remove an existing error log if invalid document set to draft', async () => {
+    await wrappedValidateSchemaOnWrite(draftChange);
+    expect(deleteSpy).not.toBeCalled();
   });
 
-  it('should remove deleted content from the error log', () => {
-    wrapped(deletedSnapshot);
-    expect(deleteDocumentStub).toBeCalled();
+  it('should remove deleted document references from the error log', async () => {
+    await wrappedValidateSchemaOnWrite(deleteChange);
+    expect(deleteSpy).toBeCalled();
+  });
+
+  describe('invalid schema', () => {
+    beforeAll(() => {
+      jest.spyOn(validateSchema, 'validateSchema').mockImplementation(() => ({ errors: true }));
+    });
+    it('should create an error log for document with invalid schema', async () => {
+      try {
+        await wrappedValidateSchemaOnWrite(publishedChange);
+      } catch (error) {}
+      expect(writeSpy).toBeCalled();
+    });
   });
 });

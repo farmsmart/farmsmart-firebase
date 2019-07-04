@@ -4,8 +4,8 @@
   "scripts": {
     "prettier": "pretty-quick --pattern functions/**/firestore/**/*.js --pattern functions/**/utils/**/*.js",
     "lint": "eslint .",
-    "test": "jest --detectOpenHandles --coverage --silent --reporters=\"jest-dot-reporter\"",
-    "test:spec": "jest spec",
+    "test": "jest unit --detectOpenHandles --coverage --silent --reporters=\"jest-dot-reporter\"",
+    "test:spec": "jest spec --detectOpenHandles",
     "test:watch": "jest --watch --silent",
     "test:ci": "jest --ci --runInBand --coverage --verbose --reporters=\"default\" --reporters=\"jest-junit\"",
     "test:debug": "jest --watch --verbose false",
