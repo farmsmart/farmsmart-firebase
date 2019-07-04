@@ -2,6 +2,7 @@ const admin = require('firebase-admin');
 const functions = require('firebase-functions');
 const { validateSchema } = require('../../validate/validate_schema');
 const firestore = require('../../utils/firestore_repository');
+const slack = require('../../utils/slack_alert');
 
 try {
   admin.initializeApp();
@@ -9,14 +10,42 @@ try {
   // firebase already initialised
 }
 
-exports = module.exports = functions.firestore
-  .document('fl_content/{id}')
-  .onWrite((change, context) => {
-    const data = change.after.data();
+const validationFailed = (id, schema, errors) => {
+  return firestore.writeDocument('fs_content_errors', id, { schema: schema, errors: errors });
+};
 
-    if (change.after.exists && data.status === 'PUBLISHED') {
-      return validateSchema(data);
+const validationPassed = id => {
+  return firestore.deleteDocument('fs_content_errors', id);
+};
+
+const alert = msg => {
+  return slack.post(msg);
+};
+
+const validateSchemaOnWrite = async change => {
+  const data = change.after.data();
+  const schema = data._fl_meta_.schema;
+
+  if (data.status === 'PUBLISHED') {
+    const errors = validateSchema(schema, data);
+    const msg = result =>
+      `Schema validation - doc: ${change.after.id}, schema: ${schema}, result: ${result}`;
+
+    if (errors) {
+      await validationFailed(change.after.id, schema, errors);
+      await alert(msg('FAILED'));
+      throw Error(msg('FAILED'));
     } else {
-      return firestore.deleteDocument('fs_content_errors', change.before.id);
+      console.log(msg);
+      return validationPassed(change.after.id, msg('PASSED'));
     }
-  });
+  }
+};
+
+module.exports = functions.firestore.document('fl_content/{id}').onWrite((change, context) => {
+  if (!change.after.exists) {
+    return firestore.deleteDocument('fs_content_errors', change.before.id);
+  }
+
+  return validateSchemaOnWrite(change);
+});
