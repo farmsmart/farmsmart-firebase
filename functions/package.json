@@ -7,7 +7,7 @@
     "test": "jest unit --detectOpenHandles --coverage --silent --reporters=\"jest-dot-reporter\"",
     "test:spec": "jest spec --detectOpenHandles",
     "test:watch": "jest --watch --silent",
-    "test:ci": "jest --ci --runInBand --coverage --verbose --reporters=\"default\" --reporters=\"jest-junit\"",
+    "test:ci": "jest unit --ci --runInBand --coverage --verbose --reporters=\"default\" --reporters=\"jest-junit\"",
     "test:debug": "jest --watch --verbose false",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
