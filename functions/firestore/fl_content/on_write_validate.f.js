@@ -12,34 +12,31 @@ try {
 
 const errorPath = id => `fs_content_errors/${id}`;
 
-const validationFailed = (id, schema, errors) => {
+const writeErrorLog = (id, schema, errors) => {
   return firestore.writeDocument(errorPath(id), { schema: schema, errors: errors });
 };
 
-const validationPassed = id => {
+const clearErrorLog = id => {
   return firestore.deleteDocument(errorPath(id));
 };
 
-const alert = msg => {
+const sendAlert = msg => {
   return slack.post(msg);
 };
 
-const validateSchemaOnWrite = async change => {
-  const data = change.after.data();
-  const schema = data._fl_meta_.schema;
-
+const validateDocumentSchema = async (id, data) => {
   if (data.status === 'PUBLISHED') {
+    const schema = data._fl_meta_.schema;
     const errors = validateSchema(schema, data);
-    const msg = result =>
-      `Schema validation - doc: ${change.after.id}, schema: ${schema}, result: ${result}`;
+    const msg = result => `Schema validation - doc: ${id}, schema: ${schema}, result: ${result}`;
 
     if (errors) {
-      await validationFailed(change.after.id, schema, errors);
-      await alert(msg('FAILED'));
+      await writeErrorLog(id, schema, errors);
+      await sendAlert(msg('FAILED'));
       throw Error(msg('FAILED'));
     } else {
       console.log(msg('PASSED'));
-      return validationPassed(change.after.id);
+      return clearErrorLog(id);
     }
   }
 };
@@ -49,5 +46,5 @@ module.exports = functions.firestore.document('fl_content/{id}').onWrite((change
     return firestore.deleteDocument(errorPath(change.before.id));
   }
 
-  return validateSchemaOnWrite(change);
+  return validateDocumentSchema(change.after.id, change.after.data());
 });
