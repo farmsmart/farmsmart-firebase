@@ -5,10 +5,12 @@ const crop_constants = {
   PROP_CROP_TITLE: 'name',
   PROP_HASH: 'dataHash',
   PROP_SCORES: 'scores',
+  PROP_VALID: 'valid',
   PROP_FACTOR: 'factor',
   PROP_WEIGHT: 'weight',
   PROP_PERCENTAGE: 'percentage',
   PROP_VALUES: 'values',
+  PROP_TOTAL_WEIGHT: 'totalWeight',
   PROP_KEY: 'key',
   PROP_RATING: 'rating',
 };
@@ -17,6 +19,7 @@ exports.CropScoreConstants = crop_constants;
 exports.CropScoreBuilder = function() {
   this.data = {};
   this.factors = new Map();
+  this.isValid = true;
 
   this.setCrop = function(cropName = null) {
     let crop = createObjectIfNotPresent(this.data, crop_constants.PROP_CROP);
@@ -46,8 +49,11 @@ exports.CropScoreBuilder = function() {
   this.addWeightingFromString = function(factor = null, weight, percentage) {
     if (factor) {
       let factorObject = this.getFactor(factor);
-      factorObject[crop_constants.PROP_WEIGHT] = parseFloat(weight);
+      let weightValue = parseFloat(weight);
+      factorObject[crop_constants.PROP_WEIGHT] = weightValue;
       factorObject[crop_constants.PROP_PERCENTAGE] = parseFloat(percentage);
+
+      this.isValid &= weightValue < 1 && weightValue > 0;
     }
   };
 
@@ -57,8 +63,12 @@ exports.CropScoreBuilder = function() {
 
       let values = createArrayIfNotPresent(factorObject, crop_constants.PROP_VALUES);
       let entry = {};
+      let ratingValue = parseInt(rating);
       entry[crop_constants.PROP_KEY] = key;
-      entry[crop_constants.PROP_RATING] = parseInt(rating);
+      entry[crop_constants.PROP_RATING] = ratingValue;
+
+      this.isValid &= ratingValue <= 10 && ratingValue >= 0;
+
       values.push(entry);
     }
   };
@@ -67,6 +77,17 @@ exports.CropScoreBuilder = function() {
     delete this.data[crop_constants.PROP_SCORES];
     let scores = createArrayIfNotPresent(this.data, crop_constants.PROP_SCORES);
     scores.push(...this.factors.values());
+
+    let totalWeight = this.data[crop_constants.PROP_SCORES].reduce(
+      (totalWeight, val) => totalWeight + val[crop_constants.PROP_WEIGHT],
+      0
+    );
+
+    return totalWeight;
+  };
+
+  this.isCropValid = function() {
+    return this.isValid;
   };
 
   this.get = function() {
@@ -74,7 +95,15 @@ exports.CropScoreBuilder = function() {
       this.setCrop();
     }
 
-    this.updateScores();
+    this.data[crop_constants.PROP_VALID] = this.isValid;
+
+    let totalWeight = this.updateScores();
+
+    this.data[crop_constants.PROP_TOTAL_WEIGHT] = totalWeight;
+    this.data[crop_constants.PROP_SCORES].forEach(factor => {
+      factor[crop_constants.PROP_PERCENTAGE] =
+        (factor[crop_constants.PROP_WEIGHT] / totalWeight) * 100;
+    });
 
     let crop = this.data[crop_constants.PROP_CROP];
     delete crop[crop_constants.PROP_HASH];
@@ -90,6 +119,7 @@ const info_constants = {
   PROP_TITLE: 'title',
   PROP_CROP_SHEETS: 'cropSheets',
   PROP_REFERENCE: 'reference',
+  PROP_SCORE_MATRIX: 'scoreMatrix',
   PROP_SHEET: 'sheet',
   PROP_DATA_HASH: 'dataHash',
 };
@@ -119,6 +149,12 @@ exports.SheetInfoBuilder = function() {
   this.setReference = function(refSheet = null) {
     if (refSheet) {
       this.data[info_constants.PROP_REFERENCE] = refSheet;
+    }
+  };
+
+  this.setScoreMatrix = function(scoreMatrixSheet = null) {
+    if (scoreMatrixSheet) {
+      this.data[info_constants.PROP_SCORE_MATRIX] = scoreMatrixSheet;
     }
   };
 
