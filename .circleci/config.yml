@@ -24,7 +24,10 @@ executors:
     docker:
       - image: farmsmart/gcp-firebase
     working_directory: *working_dir
-  
+  gcp-firebase-emulator:
+    docker:
+      - image: farmsmart/gcp-firebase-emulator
+    working_directory: *working_dir
 
 jobs:
   build:
@@ -51,7 +54,7 @@ jobs:
 
       - *save_workspace
     
-  test:
+  test-functions:
     executor: gcp-firebase
     steps:
       - *restore_workspace
@@ -61,14 +64,25 @@ jobs:
           command: |
             npm run-script lint
             npm run-script test:ci
-      # requires login and emulator
-      #- run:
-      #    working_directory: *rules_dir
-      #    name: Run unit tests for the rules
-      #    command: |
-      #      npm run-script test
       - store_test_results:
           path: /tmp/workspace/farmsmart/functions/reports
+
+  test-rules:
+    executor: gcp-firebase-emulator
+    steps:
+      - *restore_workspace
+      - run: 
+          name: Start firestore emulator in the background
+          background: true
+          command: |
+            firebase serve --only firestore
+      - run:
+          working_directory: *rules_dir
+          name: Run rules unit test 
+          command: |
+            sleep 5
+            npm run-script test
+
 
   deploy:
     executor: gcp-firebase
@@ -99,13 +113,17 @@ jobs:
             
             firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
-  integration:
+
+  verify-deployment:
     executor: gcp-firebase
     steps:
       - run:
-          name: Test integration of score engine
+          name: Verify that deployment is successful
           command: | 
             set -euo pipefail
+
+            # Dumb Check to ensure url is for the correct project
+            echo $BULKUPLOAD_URL | grep $FIREBASE_PROJECT
 
             curl --silent "${BULKUPLOAD_URL}?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
 
@@ -114,7 +132,10 @@ workflows:
   backend:
     jobs:
       - build
-      - test:
+      - test-functions:
+          requires:
+            - build
+      - test-rules:
           requires:
             - build
       - deploy:
@@ -122,7 +143,8 @@ workflows:
           name: deploy-gcp-feature
           context: gcp-feature
           requires:
-            - test
+            - test-functions
+            - test-rules
           filters:
             branches:
               only:
@@ -132,7 +154,8 @@ workflows:
           name: deploy-gcp-dev
           context: gcp-dev
           requires:
-            - test
+            - test-functions
+            - test-rules
           filters:
             branches:
               only:
@@ -142,7 +165,8 @@ workflows:
           name: deploy-gcp-stage
           context: gcp-stage
           requires:
-            - test
+            - test-functions
+            - test-rules
           filters:
             branches:
               only:
@@ -152,32 +176,34 @@ workflows:
           name: deploy-gcp-prod
           context: gcp-prod
           requires:
-            - test
+            - test-functions
+            - test-rules
           filters:
             branches:
               only:
                 - master
 
-      - integration:
-          name: it-feature
+      # Smoke testing
+      - verify-deployment:
+          name: verify-feature
           context: gcp-feature
           requires:
             - deploy-gcp-feature
 
-      - integration:
-          name: it-dev
+      - verify-deployment:
+          name: verify-dev
           context: gcp-dev
           requires:
             - deploy-gcp-dev
 
-      - integration:
-          name: it-stage
+      - verify-deployment:
+          name: verify-stage
           context: gcp-stage
           requires:
             - deploy-gcp-stage
 
-      - integration:
-          name: it-prod
+      - verify-deployment:
+          name: verify-prod
           context: gcp-prod
           requires:
             - deploy-gcp-prod
