@@ -4,7 +4,10 @@ const config = {
   projectId: 'farmsmart-development',
   databaseURL: 'https://farmsmart-development.firebaseio.com',
 };
-const test = require('firebase-functions-test')(config, './.credentials/.service-account-key.json');
+const test = require('firebase-functions-test')(
+  config,
+  './.credentials/testing-service-account-key.json'
+);
 const { firestoreFlContentOnWriteValidate } = require('../../index');
 const wrappedValidateSchemaOnWrite = test.wrap(firestoreFlContentOnWriteValidate);
 
