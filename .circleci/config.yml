@@ -152,6 +152,7 @@ workflows:
           requires:
             - build
       - test-functions-integration:
+          context: gcp-dev
           requires:
             - build
       - test-rules:
