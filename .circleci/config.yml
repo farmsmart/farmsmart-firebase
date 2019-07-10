@@ -74,6 +74,13 @@ jobs:
             secrets_dir='.credentials'
             mkdir -p ${secrets_dir}
             echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/recommendations-service-account.json
+      - run:
+          working_directory: *working_dir
+          name: Inject env variables
+          command: |
+            set -euo pipefail
+            echo "export FIREBASE_TOKEN=${FIREBASE_TOKEN}" >> ./env.sh
+            echo "export FIREBASE_PROJECT=${FIREBASE_PROJECT}" >> ./env.sh
       - *save_workspace
 
   test-functions:
@@ -103,11 +110,17 @@ jobs:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
+      - run: 
+          working_directory: *working_dir
+          name: Source environment varialbes
+          command: |
+            source ./env.sh
       - run:
           working_directory: *rules_dir
           name: Run security rules test
           command: |
-            firebase emulators:exec 'npm run test'
+            set -euo pipefail
+            firebase emulators:exec --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT 'npm run test' 
 
   deploy:
     executor: gcp-firebase
