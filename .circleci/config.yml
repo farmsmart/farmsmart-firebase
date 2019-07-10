@@ -105,22 +105,20 @@ jobs:
           working_directory: *functions_dir
           name: Run integration tests on cloud functions
           command: |
+            set -euo pipefail
+            source /tmp/workspace/farmsmart/env.sh
             firebase emulators:exec 'npm run test:spec'
 
   test-rules:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
-      - run: 
-          working_directory: *working_dir
-          name: Source environment varialbes
-          command: |
-            source ./env.sh
       - run:
           working_directory: *rules_dir
           name: Run security rules test
           command: |
             set -euo pipefail
+            source /tmp/workspace/farmsmart/env.sh
             firebase emulators:exec --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT 'npm run test' 
 
   deploy:
