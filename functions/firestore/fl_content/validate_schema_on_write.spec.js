@@ -65,7 +65,7 @@ describe('Validate Flamelink content schemas on write', () => {
   it('should validate schema for published content', async () => {
     try {
       await wrappedValidateSchemaOnWrite(publishedChange);
-    } catch {
+    } catch (error) {
       // emulator throws when firestore attempts to delete non existing record
     }
 

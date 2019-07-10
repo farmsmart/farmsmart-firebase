@@ -60,7 +60,9 @@ describe('fl_content On Write', () => {
     it('should create an error log for document with invalid schema', async () => {
       try {
         await wrappedValidateSchemaOnWrite(publishedChange);
-      } catch (error) {}
+      } catch (error) {
+        // emulator throws when firestore attempts to delete non existing record
+      }
       expect(writeSpy).toBeCalled();
     });
   });

@@ -29,7 +29,9 @@ const deleteChange = (data, id) => {
 const tryDelete = async path => {
   try {
     await firestore.deleteDocument(path);
-  } catch {}
+  } catch (error) {
+    // emulator throws when firestore attempts to delete non existing record
+  }
 };
 
 describe('Link crop scores to crops on write', () => {

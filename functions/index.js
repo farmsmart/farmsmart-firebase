@@ -4,7 +4,9 @@ const camelCase = require('camelcase');
 
 try {
   admin.initializeApp();
-} catch (err) {}
+} catch (err) {
+  // firebase already initialised
+}
 
 const files = glob.sync('./**/*.f.js', { cwd: __dirname, ignore: './node_modules/**' });
 for (let i = 0; i < files.length; i++) {
