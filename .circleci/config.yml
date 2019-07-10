@@ -1,8 +1,8 @@
 version: 2.1
 
-references: 
+references:
   working_dir: &working_dir /tmp/workspace/farmsmart
-  
+
   functions_dir: &functions_dir /tmp/workspace/farmsmart/functions
 
   rules_dir: &rules_dir /tmp/workspace/farmsmart/rules
@@ -35,14 +35,14 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "pull submodules"
+          name: 'pull submodules'
           command: |
             git submodule update --init --recursive --remote
-      
+
       - run:
           working_directory: *functions_dir
           name: Install dependencies for cloud function
-          command: | 
+          command: |
             npm install firebase-admin@latest firebase-functions@latest
             npm install
 
@@ -53,7 +53,7 @@ jobs:
             npm install
 
       - *save_workspace
-    
+
   test-functions:
     executor: gcp-firebase
     steps:
@@ -67,22 +67,39 @@ jobs:
       - store_test_results:
           path: /tmp/workspace/farmsmart/functions/reports
 
+  test-functions-integration:
+    executor: gcp-firebase
+    steps:
+      - *restore_workspace
+      - run:
+          working_directory: *functions_dir
+          name: Inject credentials for integration
+          command: |
+            set -euo pipefail
+            secrets_dir='.credentials'
+            mkdir -p ${secrets_dir}
+            echo ${TESTING_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/testing-service-account.json
+      - run:
+          working_directory: *functions_dir
+          name: Run integration tests on cloud functions
+          command: |
+            firebase emulators:exec 'npm run test:spec'
+
   test-rules:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
-      - run: 
+      - run:
           name: Start firestore emulator in the background
           background: true
           command: |
             firebase serve --only firestore
       - run:
           working_directory: *rules_dir
-          name: Run rules unit test 
+          name: Run rules unit test
           command: |
             sleep 5
             npm run-script test
-
 
   deploy:
     executor: gcp-firebase
@@ -104,22 +121,21 @@ jobs:
           command: |
             set -euo pipefail
             echo "Set firebase project cloud function configs"
-            
+
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
 
             echo "Deploy all FireBase artifacts (cloud functions, rules, hosting)"
-            
-            firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
+            firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
 
   verify-deployment:
     executor: gcp-firebase
     steps:
       - run:
           name: Verify that deployment is successful
-          command: | 
+          command: |
             set -euo pipefail
 
             # Dumb Check to ensure url is for the correct project
@@ -135,6 +151,9 @@ workflows:
       - test-functions:
           requires:
             - build
+      - test-functions-integration:
+          requires:
+            - build
       - test-rules:
           requires:
             - build
@@ -144,6 +163,7 @@ workflows:
           context: gcp-feature
           requires:
             - test-functions
+            - test-functions-integration
             - test-rules
           filters:
             branches:
@@ -155,6 +175,7 @@ workflows:
           context: gcp-dev
           requires:
             - test-functions
+            - test-functions-integration
             - test-rules
           filters:
             branches:
@@ -166,6 +187,7 @@ workflows:
           context: gcp-stage
           requires:
             - test-functions
+            - test-functions-integration
             - test-rules
           filters:
             branches:
@@ -177,6 +199,7 @@ workflows:
           context: gcp-prod
           requires:
             - test-functions
+            - test-functions-integration
             - test-rules
           filters:
             branches:
