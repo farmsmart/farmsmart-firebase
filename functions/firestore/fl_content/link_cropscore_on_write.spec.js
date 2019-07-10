@@ -1,3 +1,5 @@
+const admin = require('firebase-admin');
+const functions = require('firebase-functions');
 const config = {
   projectId: 'farmsmart-development',
   databaseURL: 'https://farmsmart-development.firebaseio.com',
@@ -8,9 +10,6 @@ const test = require('firebase-functions-test')(
 );
 
 const firestore = require('../../utils/firestore_repository');
-
-const { firestoreFlContentOnWriteLinkCropscore } = require('../../index');
-const wrappedLinkCropscore = test.wrap(firestoreFlContentOnWriteLinkCropscore);
 
 const cropPath = id => `fl_content/${id}`;
 const scorePath = id => `fs_crop_scores/${id}`;
@@ -37,6 +36,14 @@ const tryDelete = async path => {
 };
 
 describe('Link crop scores to crops on write', () => {
+  let appFunctions;
+  let wrappedLinkCropscore;
+  beforeEach(() => {
+    appFunctions = require('../../index');
+
+    wrappedLinkCropscore = test.wrap(appFunctions.firestoreFlContentOnWriteLinkCropscore);
+  });
+
   const sampleCrop = require('../../model/json/crop.sample.json');
 
   const mainId = 'xxMAINBEETSxx';
@@ -62,6 +69,10 @@ describe('Link crop scores to crops on write', () => {
     await tryDelete(scorePath('RenamedCrop'));
     await tryDelete(cropPath(mainId));
     await tryDelete(cropPath(translatedId));
+  });
+
+  it('should invoke function', async () => {
+    await wrappedLinkCropscore(change(mainCrop, mainId));
   });
 
   it('should create a link if the main (en-us) crop is published', async () => {
