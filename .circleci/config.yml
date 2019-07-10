@@ -103,6 +103,10 @@ jobs:
       - *restore_workspace
       - run:
           working_directory: *functions_dir
+          name: Workaround for emulator testing issue
+          command: npm install firebase-functions@3.0.2
+      - run:
+          working_directory: *functions_dir
           name: Run integration tests on cloud functions
           command: |
             set -euo pipefail
@@ -115,11 +119,15 @@ jobs:
       - *restore_workspace
       - run:
           working_directory: *rules_dir
+          name: Workaround for emulator testing issue
+          command: npm install firebase-functions@3.0.2
+      - run:
+          working_directory: *rules_dir
           name: Run security rules test
           command: |
             set -euo pipefail
             source /tmp/workspace/farmsmart/env.sh
-            firebase emulators:exec --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT 'npm run test' 
+            firebase emulators:exec 'npm run test' 
 
   deploy:
     executor: gcp-firebase
