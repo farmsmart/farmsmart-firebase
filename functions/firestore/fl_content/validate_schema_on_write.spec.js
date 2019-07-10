@@ -26,7 +26,7 @@ const deletedChange = (data, id) => {
   return test.makeChange(beforeSnap, afterSnap);
 };
 
-describe('Validate schema on write', () => {
+describe('Validate Flamelink content schemas on write', () => {
   const validCrop = require('../../model/json/crop.sample.json');
   const invalidCrop = { ...validCrop, name: null };
   const invalidDraftCrop = { ...invalidCrop, status: 'DRAFT' };
@@ -60,7 +60,12 @@ describe('Validate schema on write', () => {
   });
 
   it('should validate schema for published content', async () => {
-    await wrappedValidateSchemaOnWrite(publishedChange);
+    try {
+      await wrappedValidateSchemaOnWrite(publishedChange);
+    } catch {
+      // emulator throws when firestore attempts to delete non existing record
+    }
+
     const errorLog = await getDocument(errorPath(publishedId));
     expect(errorLog.exists).toBe(false);
   });

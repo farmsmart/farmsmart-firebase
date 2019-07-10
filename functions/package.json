@@ -9,6 +9,7 @@
     "test:watch": "jest --watch --silent",
     "test:ci": "jest unit --ci --runInBand --coverage --verbose --reporters=\"default\" --reporters=\"jest-junit\"",
     "test:debug": "jest --watch --verbose false",
+    "jest": "jest",
     "serve": "firebase serve --only functions",
     "shell": "firebase functions:shell",
     "start": "npm run shell",
