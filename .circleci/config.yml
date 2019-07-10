@@ -81,7 +81,7 @@ jobs:
             set -euo pipefail
             echo "export FIREBASE_TOKEN=${FIREBASE_TOKEN}" >> ./env.sh
             echo "export FIREBASE_PROJECT=${FIREBASE_PROJECT}" >> ./env.sh
-            echo "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/workspace/farmsmart/functions/.credentials/testing-service-account.json"
+            echo "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/workspace/farmsmart/functions/.credentials/testing-service-account.json" >> ./env.sh
       - *save_workspace
 
   test-functions:
