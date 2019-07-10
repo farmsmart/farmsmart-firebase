@@ -53,21 +53,8 @@ jobs:
             npm install
 
       - *save_workspace
-
-  test-functions:
-    executor: gcp-firebase
-    steps:
-      - *restore_workspace
-      - run:
-          working_directory: *functions_dir
-          name: Run unit tests on cloud functions
-          command: |
-            npm run-script lint
-            npm run-script test:ci
-      - store_test_results:
-          path: /tmp/workspace/farmsmart/functions/reports
-
-  test-functions-integration:
+  
+  credentials:
     executor: gcp-firebase
     steps:
       - *restore_workspace
@@ -81,6 +68,33 @@ jobs:
             echo ${TESTING_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/testing-service-account.json
       - run:
           working_directory: *functions_dir
+          name: Inject credentials for spreadsheet user
+          command: |
+            set -euo pipefail
+            secrets_dir='.credentials'
+            mkdir -p ${secrets_dir}
+            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/recommendations-service-account.json
+      - *save_workspace
+
+  test-functions:
+    executor: gcp-firebase
+    steps:
+      - *restore_workspace
+      - run:
+          working_directory: *functions_dir
+          name: Run unit tests on cloud functions
+          command: |
+            npm run-script lint
+            npm run-script test:ci
+      - store_test_results: 
+          path: /tmp/workspace/farmsmart/functions/reports
+
+  test-functions-integration:
+    executor: gcp-firebase-emulator
+    steps:
+      - *restore_workspace
+      - run:
+          working_directory: *functions_dir
           name: Run integration tests on cloud functions
           command: |
             firebase emulators:exec 'npm run test:spec'
@@ -90,31 +104,15 @@ jobs:
     steps:
       - *restore_workspace
       - run:
-          name: Start firestore emulator in the background
-          background: true
-          command: |
-            firebase serve --only firestore
-      - run:
           working_directory: *rules_dir
-          name: Run rules unit test
+          name: Run security rules test
           command: |
-            sleep 5
-            npm run-script test
+            firebase emulators: exec 'npm run test'
 
   deploy:
     executor: gcp-firebase
     steps:
       - *restore_workspace
-
-      - run:
-          working_directory: *functions_dir
-          name: Inject credential for spreadsheet user
-          command: |
-            set -euo pipefail
-            secrets_dir='.credentials'
-            mkdir -p ${secrets_dir}
-            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/recommendations-service-account.json
-
       - run:
           working_directory: *working_dir
           name: Deploy to firebase project
@@ -148,16 +146,58 @@ workflows:
   backend:
     jobs:
       - build
-      - test-functions:
+
+      - credentials:
+          name: credentials-feature
+          context: gcp-feature
           requires:
             - build
-      - test-functions-integration:
+          filters:
+            branches:
+              only:
+                - /feature.*/
+
+      - credentials:
+          name: credentials-develop
           context: gcp-dev
           requires:
             - build
-      - test-rules:
+          filters:
+            branches:
+              only:
+                - develop
+      
+      - credentials:
+          name: credentials-stage
+          context: gcp-stage
           requires:
             - build
+          filters:
+            branches:
+              only:
+                - /release.*/
+
+      - credentials:
+          name: credentials-prod
+          context: gcp-prod
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+
+      - test-functions:
+          requires:
+            - credentials
+      - test-rules:
+          requires:
+            - credentials      
+      - test-functions-integration:
+          requires:
+            - test-functions
+      
+
       - deploy:
           # Deploys feature branches to gcp project
           name: deploy-gcp-feature
