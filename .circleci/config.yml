@@ -101,22 +101,16 @@ jobs:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
-      - run:
-          working_directory: *functions_dir
-          name: Workaround for emulator testing issue
-          command: npm install firebase-functions@3.0.2
-      - run: 
-          name: Start firestore emulator in the background
-          background: true
-          command: |
-            firebase serve --only firestore
+      #- run:
+      #    working_directory: *functions_dir
+      #    name: Workaround for emulator testing issue
+      #    command: npm install firebase-functions@3.0.2
       - run:
           working_directory: *functions_dir
           name: Run integration tests on cloud functions
           command: |
             set -euo pipefail
             source /tmp/workspace/farmsmart/env.sh
-            sleep 5
             firebase emulators:exec 'npm run test:spec'
 
   test-rules:
