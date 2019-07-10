@@ -159,7 +159,9 @@ jobs:
   verify-deployment:
     executor: gcp-firebase
     steps:
+      - *restore_workspace
       - run:
+          working_directory: *working_dir
           name: Verify that deployment is successful
           command: |
             source ./env.sh
