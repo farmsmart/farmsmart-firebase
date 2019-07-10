@@ -148,6 +148,7 @@ workflows:
       - build
 
       - credentials:
+          name: credentials-feature
           context: gcp-feature
           requires:
             - build
@@ -157,6 +158,7 @@ workflows:
                 - /feature.*/
 
       - credentials:
+          name: credentials-develop
           context: gcp-dev
           requires:
             - build
@@ -166,6 +168,7 @@ workflows:
                 - develop
       
       - credentials:
+          name: credentials-stage
           context: gcp-stage
           requires:
             - build
@@ -175,6 +178,7 @@ workflows:
                 - /release.*/
 
       - credentials:
+          name: credentials-prod
           context: gcp-prod
           requires:
             - build
@@ -185,10 +189,13 @@ workflows:
 
       - test-functions:
           requires:
-            - credentials
+            - credentials-feature
+            - credentials-develop
+            - credentials-stage
+            - credentials-prod
       - test-rules:
           requires:
-            - credentials      
+            - build      
       - test-functions-integration:
           requires:
             - test-functions
@@ -199,7 +206,6 @@ workflows:
           name: deploy-gcp-feature
           context: gcp-feature
           requires:
-            - test-functions
             - test-functions-integration
             - test-rules
           filters:
@@ -211,7 +217,6 @@ workflows:
           name: deploy-gcp-dev
           context: gcp-dev
           requires:
-            - test-functions
             - test-functions-integration
             - test-rules
           filters:
@@ -223,7 +228,6 @@ workflows:
           name: deploy-gcp-stage
           context: gcp-stage
           requires:
-            - test-functions
             - test-functions-integration
             - test-rules
           filters:
@@ -235,7 +239,6 @@ workflows:
           name: deploy-gcp-prod
           context: gcp-prod
           requires:
-            - test-functions
             - test-functions-integration
             - test-rules
           filters:
