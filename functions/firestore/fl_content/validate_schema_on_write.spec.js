@@ -6,7 +6,7 @@ const config = {
 };
 const test = require('firebase-functions-test')(
   config,
-  './.credentials/testing-service-account-key.json'
+  '../../.credentials/testing-service-account-key.json'
 );
 const { firestoreFlContentOnWriteValidate } = require('../../index');
 const wrappedValidateSchemaOnWrite = test.wrap(firestoreFlContentOnWriteValidate);

@@ -1,3 +1,6 @@
+const admin = require('firebase-admin');
+const functions = require('firebase-functions');
+
 const firestore = require('../../utils/firestore_repository');
 const config = {
   projectId: 'farmsmart-development',
@@ -5,7 +8,7 @@ const config = {
 };
 const test = require('firebase-functions-test')(
   config,
-  './.credentials/testing-service-account-key.json'
+  '../../.credentials/testing-service-account-key.json'
 );
 const { firestoreFlContentOnWriteLinkCropscore } = require('../../index');
 const wrappedLinkCropscore = test.wrap(firestoreFlContentOnWriteLinkCropscore);
@@ -35,6 +38,8 @@ const tryDelete = async path => {
 };
 
 describe('Link crop scores to crops on write', () => {
+  admin.initializeApp(functions.config().firebase);
+
   const sampleCrop = require('../../model/json/crop.sample.json');
 
   const mainId = 'xxMAINBEETSxx';
