@@ -81,7 +81,13 @@ jobs:
             set -euo pipefail
             echo "export FIREBASE_TOKEN=${FIREBASE_TOKEN}" >> ./env.sh
             echo "export FIREBASE_PROJECT=${FIREBASE_PROJECT}" >> ./env.sh
+            echo "export SHEETS_API_KEY=${SHEETS_API_KEY}" >> ./env.sh
+            echo "export SCORE_DOC_ID=${SCORE_DOC_ID}" >> ./env.sh
+            echo "export SLACK_FARMSMART_TOKEN=${SLACK_FARMSMART_TOKEN}" >> ./env.sh
+            echo "export BULKUPLOAD_URL=${BULKUPLOAD_URL}" >> ./env.sh
+
             echo "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/workspace/farmsmart/functions/.credentials/testing-service-account.json" >> ./env.sh
+
       - *save_workspace
 
   test-functions:
@@ -101,11 +107,6 @@ jobs:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
-      #- run:
-      #    working_directory: *functions_dir
-      #    name: Workaround for emulator testing issue
-      #    command: |
-      #      npm install firebase-admin@8.2.0 firebase-functions@3.0.2 
       - run: 
           name: Start firestore emulator in the background
           background: true
@@ -117,7 +118,6 @@ jobs:
           command: |
             set -euo pipefail
             sleep 5
-            #source /tmp/workspace/farmsmart/env.sh
             npm run test:spec
 
   test-rules:
@@ -144,6 +144,7 @@ jobs:
           working_directory: *working_dir
           name: Deploy to firebase project
           command: |
+            source ./env.sh
             set -euo pipefail
             echo "Set firebase project cloud function configs"
 
@@ -161,6 +162,7 @@ jobs:
       - run:
           name: Verify that deployment is successful
           command: |
+            source ./env.sh
             set -euo pipefail
 
             # Dumb Check to ensure url is for the correct project
@@ -236,74 +238,14 @@ workflows:
 
       - deploy:
           # Deploys feature branches to gcp project
-          name: deploy-gcp-feature
-          context: gcp-feature
           requires:
             - test-functions
             - test-functions-integration
             - test-rules
-          filters:
-            branches:
-              only:
-                - /feature.*/
-      - deploy:
-          # Deploys develop branch to gcp project
-          name: deploy-gcp-dev
-          context: gcp-dev
-          requires:
-            - test-functions
-            - test-functions-integration
-            - test-rules
-          filters:
-            branches:
-              only:
-                - develop
-      - deploy:
-          # Deploys release branches to gcp project
-          name: deploy-gcp-stage
-          context: gcp-stage
-          requires:
-            - test-functions
-            - test-functions-integration
-            - test-rules
-          filters:
-            branches:
-              only:
-                - /release.*/
-      - deploy:
-          # Deploys master to gcp project
-          name: deploy-gcp-prod
-          context: gcp-prod
-          requires:
-            - test-functions
-            - test-functions-integration
-            - test-rules
-          filters:
-            branches:
-              only:
-                - master
 
       # Smoke testing
       - verify-deployment:
-          name: verify-feature
-          context: gcp-feature
           requires:
-            - deploy-gcp-feature
+            - deploy
 
-      - verify-deployment:
-          name: verify-dev
-          context: gcp-dev
-          requires:
-            - deploy-gcp-dev
-
-      - verify-deployment:
-          name: verify-stage
-          context: gcp-stage
-          requires:
-            - deploy-gcp-stage
-
-      - verify-deployment:
-          name: verify-prod
-          context: gcp-prod
-          requires:
-            - deploy-gcp-prod
+      
