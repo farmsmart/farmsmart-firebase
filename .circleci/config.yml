@@ -65,7 +65,7 @@ jobs:
             set -euo pipefail
             secrets_dir='.credentials'
             mkdir -p ${secrets_dir}
-            echo ${TESTING_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/testing-service-account.json
+            echo ${TESTING_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/testing-service-account-key.json
       - run:
           working_directory: *functions_dir
           name: Inject credentials for spreadsheet user
