@@ -42,19 +42,23 @@ npm test
 
 ## CI/CD
 
-_For development deployments_
+### For development deployments:
+
 This repository is connected to CircleCI to run tests and deploys to a firebase project.
 Commits to feature/, develop, release/ and master branches will trigger a build and deploys to pre production projects automatically.
 
-feature branches deploys to a feature project
-develop branch deploys to the develop project
-release branches deploys to release project
+_feature_ branches deploys to a feature project
+_develop_ branch deploys to the dev project
+_release_ branches deploys to staging project
 
 ## Release Management
 
-_For production deployments_
-Commits to master branch will trigger a build and deployment. This deployment requires a manual approval step in CircleCI.
+### For production deployments:
+
+Commits to master branch will trigger a build and deployment.
+This deployment requires a manual approval step in CircleCI.
 A member of the team with push privilege should visit CircleCI and approve the workflow step that is on hold.
 
-Release tags can be created following the format: v1.0.0
-Release tags will trigger a build on CircleCI and will require manual approval before new code is deployed to Firebase.
+Release tags can be created following the format: **v1.0.0**
+
+Release tags will trigger a build on CircleCI and will require manual approval before new code is deployed to Firebase production project.
