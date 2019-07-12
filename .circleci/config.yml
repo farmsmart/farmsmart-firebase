@@ -179,7 +179,7 @@ workflows:
 
 
       - credentials:
-          name: credentials-feature
+          name: prepare-feature
           context: gcp-feature
           requires:
             - build
@@ -189,7 +189,7 @@ workflows:
                 - /feature.*/
 
       - credentials:
-          name: credentials-test
+          name: prepare-test-tag
           context: gcp-feature
           requires:
             - build
@@ -200,7 +200,7 @@ workflows:
               only: /^test.*/
 
       - credentials:
-          name: credentials-develop
+          name: prepare-develop
           context: gcp-dev
           requires:
             - build
@@ -210,7 +210,7 @@ workflows:
                 - develop
       
       - credentials:
-          name: credentials-stage
+          name: prepare-stage
           context: gcp-stage
           requires:
             - build
@@ -220,7 +220,7 @@ workflows:
                 - /release.*/
 
       - credentials:
-          name: credentials-prod
+          name: prepare-prod
           context: gcp-prod
           requires:
             - build
@@ -231,7 +231,7 @@ workflows:
 
       # Release deployments will only run for tags eg.: v1
       - credentials:
-          name: credentials-release
+          name: prepare-release-tag
           context: gcp-prod
           requires:
             - build
@@ -245,36 +245,36 @@ workflows:
 
       - test-functions:
           requires:
-            - credentials-feature
-            - credentials-test
-            - credentials-develop
-            - credentials-stage
-            - credentials-release
-            - credentials-prod
+            - prepare-feature
+            - prepare-test-tag
+            - prepare-develop
+            - prepare-stage
+            - prepare-release-tag
+            - prepare-prod
           filters:
             tags:
               only: /.*/
 
       - test-rules:
           requires:
-            - credentials-feature
-            - credentials-test
-            - credentials-develop
-            - credentials-stage
-            - credentials-release
-            - credentials-prod
+            - prepare-feature
+            - prepare-test-tag
+            - prepare-develop
+            - prepare-stage
+            - prepare-release-tag
+            - prepare-prod
           filters:
             tags:
               only: /.*/
 
       - test-functions-integration:
           requires:
-            - credentials-feature
-            - credentials-test
-            - credentials-develop
-            - credentials-stage
-            - credentials-release
-            - credentials-prod
+            - prepare-feature
+            - prepare-test-tag
+            - prepare-develop
+            - prepare-stage
+            - prepare-release-tag
+            - prepare-prod
           filters:
             tags:
               only: /.*/
@@ -283,8 +283,9 @@ workflows:
       - approval:
           type: approval
           requires:
-            - credentials-release
-            - credentials-prod
+            - prepare-test-tag
+            - prepare-release-tag
+            - prepare-prod
           filters:
             tags:
               only: /.*/
