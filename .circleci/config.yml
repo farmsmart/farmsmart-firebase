@@ -216,7 +216,17 @@ workflows:
           filters:
             branches:
               only:
-                ignore: /.*/
+                - master
+
+      # Release deployments will only run for tags.
+      - credentials:
+          name: credentials-release
+          context: gcp-prod
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
             tags:
               only: /^v.*/
 
@@ -225,30 +235,30 @@ workflows:
             - credentials-feature
             - credentials-develop
             - credentials-stage
+            - credentials-release
             - credentials-prod
-          filters:
-            tags:
-              only: /.*/
 
       - test-rules:
           requires:
             - credentials-feature
             - credentials-develop
             - credentials-stage
+            - credentials-release
             - credentials-prod
-          filters:
-            tags:
-              only: /.*/
 
       - test-functions-integration:
           requires:
             - credentials-feature
             - credentials-develop
             - credentials-stage
+            - credentials-release
             - credentials-prod
-          filters:
-            tags:
-              only: /.*/
+
+      # All cloud deployments for release require a manual approval
+      - approval:
+          type: approval
+          requires:
+            - credentials-release
 
       - deploy:
           # Deploys feature branches to gcp project
@@ -256,16 +266,11 @@ workflows:
             - test-functions
             - test-functions-integration
             - test-rules
-          filters:
-            tags:
-              only: /.*/
+            - approval
 
       # Smoke testing
       - verify-deployment:
           requires:
             - deploy
-          filters:
-            tags:
-              only: /.*/
 
       
