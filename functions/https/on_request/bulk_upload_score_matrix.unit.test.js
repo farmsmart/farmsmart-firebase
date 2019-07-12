@@ -4,9 +4,9 @@ const test = require('firebase-functions-test')();
 const score_repository = require('../../score/score_repository');
 const sheets_helper = require('../../score/sheets_helper');
 const transform_info = require('../../score/transform_info');
-const transform_score = require('../../score/transform_score');
+const transform_score = require('../../score/transform_scorev2');
 
-describe('htts On Request upload spreadsheet', () => {
+describe('htts On Request upload Score Matrix', () => {
   let wrapped;
   let request, response;
   let statusFunction, sendFunction;
@@ -14,7 +14,7 @@ describe('htts On Request upload spreadsheet', () => {
 
   beforeAll(() => {
     myFunctions = require('../../index');
-    wrapped = myFunctions.httpsOnRequestBulkUploadSpreadsheet;
+    wrapped = myFunctions.httpsOnRequestBulkUploadScoreMatrix;
   });
 
   afterAll(() => {
@@ -71,16 +71,19 @@ describe('htts On Request upload spreadsheet', () => {
 
     jest.spyOn(score_repository, 'createDate').mockReturnValue({});
 
-    const score_data = {
-      crop: {
-        name: 'CROP',
+    const score_data = [
+      {
+        crop: {
+          name: 'CROP',
+        },
       },
-    };
+    ];
 
-    jest.spyOn(transform_score, 'transformCropScore').mockReturnValue(score_data);
+    jest.spyOn(transform_score, 'transformCropScores').mockReturnValue(score_data);
 
     jest.spyOn(transform_info, 'transformSpreadsheetDoc').mockReturnValue({
       cropSheets: [{}],
+      scoreMatrix: 'SCORE MATRIX',
     });
 
     request = {
