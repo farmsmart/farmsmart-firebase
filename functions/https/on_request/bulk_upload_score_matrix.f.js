@@ -32,14 +32,14 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     const spreadsheet = await sheets_helper
       .fetchSpreadsheet(sheetId, apiauth, apiKey)
       .then(data => {
-        let result = transform_info.transformSpreadsheetDoc(data);
+        const result = transform_info.transformSpreadsheetDoc(data);
         console.log('Fetched spreadsheet');
         return Promise.resolve(result);
       });
 
     // Update the record of the spreadsheet document into fs_score_info
     // It is possible to have multiple spreadsheets by passing in a different id
-    let db = admin.firestore();
+    const db = admin.firestore();
     const infoRef = db.collection(`fs_score_info`).doc(sheetId);
     await db.runTransaction(tx => {
       spreadsheet.lastFetch = score_repository.createDate(new Date());
@@ -47,12 +47,6 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       return Promise.resolve(true);
     });
 
-    // Fetches sheet from google API => Transform into JSON document => Write to FireStore
-    const transformResultData = data => {
-      console.log(`Transforming sheet data into Crop Scores`);
-      let result = transform_score.transformCropScores(data);
-      return Promise.resolve(result);
-    };
     const writeScoreToFireStore = scoreData => {
       if (!scoreData.crop.name) {
         return Promise.reject(new Error(`Transformed document is invalid`));
@@ -60,40 +54,31 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.name);
         return db.runTransaction(tx => {
           console.log(`Writing crop score to FireStore: ${scoreData.crop.name}`);
-          let meta = {};
-          meta.spreadsheetId = sheetId;
-          meta.updated = score_repository.createDate(new Date());
-          scoreData.meta = meta;
+          scoreData.meta = {
+            spreadsheetId: sheetId,
+            updated: score_repository.createDate(new Date()),
+          };
           tx.set(scoreRef, scoreData);
           return Promise.resolve(scoreData.crop.name);
         });
       }
     };
-
     let crops = [];
     if (spreadsheet.scoreMatrix) {
-      let cropsData = await sheets_helper
-        .fetchSheetValues(spreadsheet.scoreMatrix, apiauth, sheetId, apiKey)
-        .then(transformResultData);
+      const sheetData = await sheets_helper.fetchSheetValues(
+        spreadsheet.scoreMatrix,
+        apiauth,
+        sheetId,
+        apiKey
+      );
+      const cropsData = transform_score.transformCropScores(sheetData);
       console.log(`Processing ${cropsData.length} crop scores`);
 
       crops = await Promise.all(cropsData.map(crop => writeScoreToFireStore(crop)));
       console.log(`Uploaded crop scores: ${crops}`);
 
       // Delete any crop record that is not in the spreadsheet.
-      const cropScoreRef = db.collection(`fs_crop_scores`);
-      const existingCrops = await cropScoreRef
-        .where('meta.spreadsheetId', '==', sheetId)
-        .get()
-        .then(snapshot => {
-          if (snapshot.empty) {
-            return [];
-          }
-          return snapshot.docs.map(doc => doc.id);
-        });
-      let cropsToRemove = existingCrops.filter(crop => !crops.includes(crop));
-      console.log(`Deleting crop scores: ${cropsToRemove} `);
-      cropsToRemove.map(crop => cropScoreRef.doc(crop).delete());
+      score_repository.deleteOrphanCropScores(db.collection(`fs_crop_scores`), sheetId, crops);
     }
 
     console.log('Successfully processed spreadsheet');

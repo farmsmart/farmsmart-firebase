@@ -102,4 +102,74 @@ describe('Score repository', () => {
     expect(updateDocument).toBeCalled();
     done();
   });
+
+  describe('Test deleting Orhan Crop Scores', () => {
+    // given
+    const snapshot = jest.fn().mockImplementation(() => ({
+      get: jest.fn().mockImplementation(() => ({
+        empty: false,
+        docs: [{ id: 'Apple' }],
+      })),
+    }));
+
+    const deleteFn = jest.fn();
+    const crop = jest.fn().mockImplementation(() => ({
+      delete: deleteFn,
+    }));
+
+    const ref = {
+      where: snapshot,
+      doc: crop,
+    };
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    test('should delete ophan crop scores', async done => {
+      // when
+      await repository.deleteOrphanCropScores(ref, 'TEST', ['Orange']);
+
+      // then
+      expect(snapshot).toBeCalled();
+      expect(crop).toBeCalledWith('Apple');
+      expect(deleteFn).toBeCalled();
+
+      done();
+    });
+
+    test('should not delete if crop is not an orphan', async done => {
+      // when
+      await repository.deleteOrphanCropScores(ref, 'TEST', ['Apple']);
+
+      // then
+      expect(snapshot).toBeCalled();
+      expect(deleteFn).toHaveBeenCalledTimes(0);
+
+      done();
+    });
+
+    test('should not delete there are no crops', async done => {
+      const snapshot = jest.fn().mockImplementation(() => ({
+        get: jest.fn().mockImplementation(() => ({
+          empty: true,
+          docs: [{ id: 'Apple' }],
+        })),
+      }));
+
+      const ref = {
+        where: snapshot,
+        doc: crop,
+      };
+
+      // when
+      await repository.deleteOrphanCropScores(ref, 'TEST', ['Apple']);
+
+      // then
+      expect(snapshot).toBeCalled();
+      expect(deleteFn).toHaveBeenCalledTimes(0);
+
+      done();
+    });
+  });
 });
