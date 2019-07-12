@@ -179,7 +179,7 @@ workflows:
 
 
       - credentials:
-          name: credentials-feature
+          name: prepare-feature
           context: gcp-feature
           requires:
             - build
@@ -189,7 +189,18 @@ workflows:
                 - /feature.*/
 
       - credentials:
-          name: credentials-develop
+          name: prepare-test-tag
+          context: gcp-feature
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^test.*/
+
+      - credentials:
+          name: prepare-develop
           context: gcp-dev
           requires:
             - build
@@ -199,7 +210,7 @@ workflows:
                 - develop
       
       - credentials:
-          name: credentials-stage
+          name: prepare-stage
           context: gcp-stage
           requires:
             - build
@@ -209,7 +220,7 @@ workflows:
                 - /release.*/
 
       - credentials:
-          name: credentials-prod
+          name: prepare-prod
           context: gcp-prod
           requires:
             - build
@@ -218,9 +229,9 @@ workflows:
               only:
                 - master
 
-      # Release deployments will only run for tags.
+      # Release deployments will only run for tags eg.: v1
       - credentials:
-          name: credentials-release
+          name: prepare-release-tag
           context: gcp-prod
           requires:
             - build
@@ -232,34 +243,49 @@ workflows:
 
       - test-functions:
           requires:
-            - credentials-feature
-            - credentials-develop
-            - credentials-stage
-            - credentials-release
-            - credentials-prod
+            - prepare-feature
+            - prepare-test-tag
+            - prepare-develop
+            - prepare-stage
+            - prepare-release-tag
+            - prepare-prod
+          filters:
+            tags:
+              only: /.*/
 
       - test-rules:
           requires:
-            - credentials-feature
-            - credentials-develop
-            - credentials-stage
-            - credentials-release
-            - credentials-prod
+            - prepare-feature
+            - prepare-test-tag
+            - prepare-develop
+            - prepare-stage
+            - prepare-release-tag
+            - prepare-prod
+          filters:
+            tags:
+              only: /.*/
 
       - test-functions-integration:
           requires:
-            - credentials-feature
-            - credentials-develop
-            - credentials-stage
-            - credentials-release
-            - credentials-prod
+            - prepare-feature
+            - prepare-test-tag
+            - prepare-develop
+            - prepare-stage
+            - prepare-release-tag
+            - prepare-prod
+          filters:
+            tags:
+              only: /.*/
 
       # All cloud deployments for release require a manual approval
       - approval:
           type: approval
           requires:
-            - credentials-release
-            - credentials-prod
+            - prepare-release-tag
+            - prepare-prod
+          filters:
+            tags:
+              only: /.*/
 
       - deploy:
           # Deploys feature branches to gcp project
@@ -268,10 +294,16 @@ workflows:
             - test-functions-integration
             - test-rules
             - approval
+          filters:
+            tags:
+              only: /.*/
 
       # Smoke testing
       - verify-deployment:
           requires:
             - deploy
+          filters:
+            tags:
+              only: /.*/
 
       
