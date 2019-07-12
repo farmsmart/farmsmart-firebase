@@ -10,11 +10,12 @@ firebase-debug.log*
 .firebase/
 
 # Firebase config
+.credentials/
 
 # Uncomment this if you'd like others to create their own Firebase project.
 # For a team working on the same Firebase project(s), it is recommended to leave
 # it commented so all members can deploy to the same project(s) in .firebaserc.
-# .firebaserc
+.firebaserc
 
 # Runtime data
 pids
@@ -27,6 +28,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+reports
 
 # nyc test coverage
 .nyc_output
@@ -63,3 +65,5 @@ node_modules/
 
 # dotenv environment variables file
 .env
+
+.credentials/*.json

@@ -1,81 +1,277 @@
 version: 2.1
 
+references:
+  working_dir: &working_dir /tmp/workspace/farmsmart
+
+  functions_dir: &functions_dir /tmp/workspace/farmsmart/functions
+
+  rules_dir: &rules_dir /tmp/workspace/farmsmart/rules
+
+  workspace: &workspace /tmp/workspace
+
+  restore_workspace: &restore_workspace
+    attach_workspace:
+      at: *workspace
+
+  save_workspace: &save_workspace
+    persist_to_workspace:
+      root: *workspace
+      paths:
+        - farmsmart
+
 executors:
-  node-executor:
+  gcp-firebase:
     docker:
-      - image: circleci/node:8.15.1-stretch-browsers-legacy
-    working_directory: /tmp/workspace
+      - image: farmsmart/gcp-firebase
+    working_directory: *working_dir
+  gcp-firebase-emulator:
+    docker:
+      - image: farmsmart/gcp-firebase-emulator
+    working_directory: *working_dir
 
 jobs:
   build:
-    executor: node-executor
-    working_directory: /tmp/workspace/farmsmart
+    executor: gcp-firebase
     steps:
       - checkout
+      - run:
+          name: 'pull submodules'
+          command: |
+            git submodule update --init --recursive --remote
 
-      - restore_cache:
-          key: dependency-cache-{{ .Branch }}
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: install firebase
-          command: npm install --save-dev firebase-tools
+          working_directory: *functions_dir
+          name: Install dependencies for cloud function
+          command: |
+            npm install firebase-admin@latest firebase-functions@latest
+            npm install
+
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: update firebase
-          command: npm install firebase-admin@latest firebase-functions@latest
-      - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: install app dependencies
-          command: npm install
-      - save_cache:
-          key: dependency-cache-{{ .Branch }}
-          paths:
-            - /tmp/workspace/farmsmart/functions/.node_modules
-      - persist_to_workspace:
-          root: /tmp/workspace
-          paths:
-            - farmsmart
-  test:
-    executor: node-executor
+          working_directory: *rules_dir
+          name: Install dependencies for rules
+          command: |
+            npm install
+
+      - *save_workspace
+  
+  credentials:
+    executor: gcp-firebase
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
+      - *restore_workspace
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: code base lint
-          command: | 
-                   npm run-script lint
-                   npm run-script test   
+          working_directory: *functions_dir
+          name: Inject credentials for integration
+          command: |
+            set -euo pipefail
+            secrets_dir='.credentials'
+            mkdir -p ${secrets_dir}
+            echo ${TESTING_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/testing-service-account-key.json
+      - run:
+          working_directory: *functions_dir
+          name: Inject credentials for spreadsheet user
+          command: |
+            set -euo pipefail
+            secrets_dir='.credentials'
+            mkdir -p ${secrets_dir}
+            echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/recommendations-service-account.json
+      - run:
+          working_directory: *working_dir
+          name: Inject env variables
+          command: |
+            set -euo pipefail
+            echo "export FIREBASE_TOKEN=${FIREBASE_TOKEN}" >> ./env.sh
+            echo "export FIREBASE_PROJECT=${FIREBASE_PROJECT}" >> ./env.sh
+            echo "export SHEETS_API_KEY=${SHEETS_API_KEY}" >> ./env.sh
+            echo "export SCORE_DOC_ID=${SCORE_DOC_ID}" >> ./env.sh
+            echo "export SLACK_FARMSMART_TOKEN=${SLACK_FARMSMART_TOKEN}" >> ./env.sh
+            echo "export BULKUPLOAD_URL=${BULKUPLOAD_URL}" >> ./env.sh
 
-      
+            echo "export GOOGLE_APPLICATION_CREDENTIALS=/tmp/workspace/farmsmart/functions/.credentials/testing-service-account.json" >> ./env.sh
+
+      - *save_workspace
+
+  test-functions:
+    executor: gcp-firebase
+    steps:
+      - *restore_workspace
+      - run:
+          working_directory: *functions_dir
+          name: Run unit tests on cloud functions
+          command: |
+            npm run-script lint
+            npm run-script test:ci
+      - store_test_results: 
+          path: /tmp/workspace/farmsmart/functions/reports
+
+  test-functions-integration:
+    executor: gcp-firebase-emulator
+    steps:
+      - *restore_workspace
+      - run: 
+          name: Start firestore emulator in the background
+          background: true
+          command: |
+            firebase serve --only firestore
+      - run:
+          working_directory: *functions_dir
+          name: Run integration tests on cloud functions
+          command: |
+            set -euo pipefail
+            sleep 5
+            npm run test:spec
+
+  test-rules:
+    executor: gcp-firebase-emulator
+    steps:
+      - *restore_workspace
+      - run: 
+          name: Start firestore emulator in the background
+          background: true
+          command: |
+            firebase serve --only firestore
+      - run:
+          working_directory: *rules_dir
+          name: Run rules unit test 
+          command: |
+            sleep 5
+            npm run-script test 
+
   deploy:
-    executor: node-executor
+    executor: gcp-firebase
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
+      - *restore_workspace
       - run:
-          working_directory: /tmp/workspace/farmsmart/functions
-          name: deploy firebase
-          command: npm run deploy -- --token $FIREBASE_TOKEN
+          working_directory: *working_dir
+          name: Deploy to firebase project
+          command: |
+            source ./env.sh
+            set -euo pipefail
+            echo "Set firebase project cloud function configs"
+
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.doc.id=${SCORE_DOC_ID}
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
+
+            echo "Deploy all FireBase artifacts (cloud functions, rules, hosting)"
+
+            firebase deploy --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT --force
+
+  verify-deployment:
+    executor: gcp-firebase
+    steps:
+      - *restore_workspace
+      - run:
+          working_directory: *working_dir
+          name: Verify that deployment is successful
+          command: |
+            source ./env.sh
+            set -euo pipefail
+
+            curl --silent "https://us-central1-${FIREBASE_PROJECT}.cloudfunctions.net/httpsOnRequestBulkUploadScoreMatrix?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
 
 workflows:
-  version: 2
-
   backend:
-    jobs: 
-      - build
-      - test:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
+
+      - credentials:
+          name: credentials-feature
+          context: gcp-feature
           requires:
             - build
-      # TODO: Basic deployment strategy. ie Only deploy on master and develop
-      # TODO: Note this is a live deploy, so need to revisit           
-      - deploy:
-          requires:
-            - test
           filters:
             branches:
-              only: 
+              only:
+                - /feature.*/
+
+      - credentials:
+          name: credentials-develop
+          context: gcp-dev
+          requires:
+            - build
+          filters:
+            branches:
+              only:
                 - develop
+      
+      - credentials:
+          name: credentials-stage
+          context: gcp-stage
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - /release.*/
+
+      - credentials:
+          name: credentials-prod
+          context: gcp-prod
+          requires:
+            - build
+          filters:
+            branches:
+              only:
                 - master
+
+      # Release deployments will only run for tags.
+      - credentials:
+          name: credentials-release
+          context: gcp-prod
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
+      - test-functions:
+          requires:
+            - credentials-feature
+            - credentials-develop
+            - credentials-stage
+            - credentials-release
+            - credentials-prod
+
+      - test-rules:
+          requires:
+            - credentials-feature
+            - credentials-develop
+            - credentials-stage
+            - credentials-release
+            - credentials-prod
+
+      - test-functions-integration:
+          requires:
+            - credentials-feature
+            - credentials-develop
+            - credentials-stage
+            - credentials-release
+            - credentials-prod
+
+      # All cloud deployments for release require a manual approval
+      - approval:
+          type: approval
+          requires:
+            - credentials-release
+            - credentials-prod
+
+      - deploy:
+          # Deploys feature branches to gcp project
+          requires:
+            - test-functions
+            - test-functions-integration
+            - test-rules
+            - approval
+
+      # Smoke testing
+      - verify-deployment:
+          requires:
+            - deploy
 
       
