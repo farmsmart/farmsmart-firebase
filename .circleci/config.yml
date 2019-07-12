@@ -172,7 +172,7 @@ jobs:
 workflows:
   backend:
     jobs:
-      - build
+      - build:
           filters:
             tags:
               only: /.*/
