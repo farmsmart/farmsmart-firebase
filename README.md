@@ -47,9 +47,9 @@ npm test
 This repository is connected to CircleCI to run tests and deploys to a firebase project.
 Commits to feature/, develop, release/ and master branches will trigger a build and deploys to pre production projects automatically.
 
-_feature_ branches deploys to a feature project
-_develop_ branch deploys to the dev project
-_release_ branches deploys to staging project
+- _feature_ branches deploys to a feature project
+- _develop_ branch deploys to the dev project
+- _release_ branches deploys to staging project
 
 ## Release Management
 
