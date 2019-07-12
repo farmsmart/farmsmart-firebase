@@ -31,3 +31,17 @@ exports.deleteLink = async function(linksRef, cmsDocId) {
 exports.createDate = function() {
   return admin.firestore.Timestamp.fromDate(new Date());
 };
+
+exports.deleteOrphanCropScores = async function(cropScoreRef, sheetId, newCrops) {
+  const snapshot = await cropScoreRef.where('meta.spreadsheetId', '==', sheetId).get();
+  if (snapshot.empty) {
+    return [];
+  }
+  const existingCrops = snapshot.docs.map(doc => doc.id);
+
+  const cropsToRemove = existingCrops.filter(crop => !newCrops.includes(crop));
+  if (cropsToRemove.length > 0) {
+    console.log(`Deleting crop scores: ${cropsToRemove} `);
+    cropsToRemove.map(crop => cropScoreRef.doc(crop).delete());
+  }
+};

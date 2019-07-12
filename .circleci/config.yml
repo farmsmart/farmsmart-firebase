@@ -167,16 +167,16 @@ jobs:
             source ./env.sh
             set -euo pipefail
 
-            # Dumb Check to ensure url is for the correct project
-            echo $BULKUPLOAD_URL | grep $FIREBASE_PROJECT
-
-            curl --silent "${BULKUPLOAD_URL}?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
+            curl --silent "https://us-central1-${FIREBASE_PROJECT}.cloudfunctions.net/httpsOnRequestBulkUploadScoreMatrix?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
 
 workflows:
-  version: 2
   backend:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
+
 
       - credentials:
           name: credentials-feature
@@ -218,25 +218,48 @@ workflows:
               only:
                 - master
 
+      # Release deployments will only run for tags.
+      - credentials:
+          name: credentials-release
+          context: gcp-prod
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
+
       - test-functions:
           requires:
             - credentials-feature
             - credentials-develop
             - credentials-stage
+            - credentials-release
             - credentials-prod
+
       - test-rules:
           requires:
             - credentials-feature
             - credentials-develop
             - credentials-stage
-            - credentials-prod    
+            - credentials-release
+            - credentials-prod
+
       - test-functions-integration:
           requires:
             - credentials-feature
             - credentials-develop
             - credentials-stage
+            - credentials-release
             - credentials-prod
-      
+
+      # All cloud deployments for release require a manual approval
+      - approval:
+          type: approval
+          requires:
+            - credentials-release
+            - credentials-prod
 
       - deploy:
           # Deploys feature branches to gcp project
@@ -244,6 +267,7 @@ workflows:
             - test-functions
             - test-functions-integration
             - test-rules
+            - approval
 
       # Smoke testing
       - verify-deployment:

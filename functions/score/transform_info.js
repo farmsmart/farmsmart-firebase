@@ -7,6 +7,7 @@ const fields = {
   ATTR_SHEETS: 'sheets',
   CROP_SHEET_SUFFIX: 'Scores',
   FACTOR_REF_SHEET: 'Reference Table',
+  SCORE_MATRIX_SHEET: 'SCORE MATRIX',
 };
 
 exports.transformSpreadsheetDoc = function(data) {
@@ -31,6 +32,8 @@ exports.transformSpreadsheetDoc = function(data) {
         builder.addCrop(crop, sheetTitle);
       } else if (sheetTitle === fields.FACTOR_REF_SHEET) {
         builder.setReference(sheetTitle);
+      } else if (sheetTitle === fields.SCORE_MATRIX_SHEET) {
+        builder.setScoreMatrix(sheetTitle);
       }
     }
   }
