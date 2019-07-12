@@ -241,8 +241,6 @@ workflows:
             tags:
               only: /^v.*/
 
-      
-
       - test-functions:
           requires:
             - prepare-feature
@@ -283,7 +281,6 @@ workflows:
       - approval:
           type: approval
           requires:
-            - prepare-test-tag
             - prepare-release-tag
             - prepare-prod
           filters:
