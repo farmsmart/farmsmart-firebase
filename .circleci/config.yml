@@ -259,6 +259,7 @@ workflows:
           type: approval
           requires:
             - credentials-release
+            - credentials-prod
 
       - deploy:
           # Deploys feature branches to gcp project
