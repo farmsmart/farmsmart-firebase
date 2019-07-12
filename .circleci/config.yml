@@ -189,6 +189,17 @@ workflows:
                 - /feature.*/
 
       - credentials:
+          name: credentials-test
+          context: gcp-feature
+          requires:
+            - build
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^test.*/
+
+      - credentials:
           name: credentials-develop
           context: gcp-dev
           requires:
@@ -218,7 +229,7 @@ workflows:
               only:
                 - master
 
-      # Release deployments will only run for tags.
+      # Release deployments will only run for tags eg.: v1
       - credentials:
           name: credentials-release
           context: gcp-prod
@@ -230,29 +241,43 @@ workflows:
             tags:
               only: /^v.*/
 
+      
+
       - test-functions:
           requires:
             - credentials-feature
+            - credentials-test
             - credentials-develop
             - credentials-stage
             - credentials-release
             - credentials-prod
+          filters:
+            tags:
+              only: /.*/
 
       - test-rules:
           requires:
             - credentials-feature
+            - credentials-test
             - credentials-develop
             - credentials-stage
             - credentials-release
             - credentials-prod
+          filters:
+            tags:
+              only: /.*/
 
       - test-functions-integration:
           requires:
             - credentials-feature
+            - credentials-test
             - credentials-develop
             - credentials-stage
             - credentials-release
             - credentials-prod
+          filters:
+            tags:
+              only: /.*/
 
       # All cloud deployments for release require a manual approval
       - approval:
@@ -260,6 +285,9 @@ workflows:
           requires:
             - credentials-release
             - credentials-prod
+          filters:
+            tags:
+              only: /.*/
 
       - deploy:
           # Deploys feature branches to gcp project
@@ -268,10 +296,16 @@ workflows:
             - test-functions-integration
             - test-rules
             - approval
+          filters:
+            tags:
+              only: /.*/
 
       # Smoke testing
       - verify-deployment:
           requires:
             - deploy
+          filters:
+            tags:
+              only: /.*/
 
       
