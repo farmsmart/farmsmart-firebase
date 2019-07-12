@@ -1,28 +1,28 @@
 const admin = require('firebase-admin');
 
-try {
-  admin.initializeApp();
-} catch (err) {
-  // firebase already initialised
-}
-
-async function writeDocument(collection, documentId, data) {
-  return await admin
+const getDocument = path => {
+  return admin
     .firestore()
-    .collection(collection)
-    .doc(documentId)
+    .doc(path)
+    .get();
+};
+
+const writeDocument = (path, data) => {
+  return admin
+    .firestore()
+    .doc(path)
     .set(data);
-}
+};
 
-async function deleteDocument(collection, documentId) {
-  return await admin
+const deleteDocument = path => {
+  return admin
     .firestore()
-    .collection(collection)
-    .doc(documentId)
+    .doc(path)
     .delete();
-}
+};
 
-exports = module.exports = {
-  writeDocument: writeDocument,
-  deleteDocument: deleteDocument,
+module.exports = {
+  getDocument,
+  writeDocument,
+  deleteDocument,
 };
