@@ -1,8 +1,14 @@
 # farmsmart-firebase
 
-Master: [![CircleCI](https://circleci.com/gh/farmsmart/farmsmart-firebase/tree/master.svg?style=svg)](https://circleci.com/gh/farmsmart/farmsmart-firebase/tree/master)
+#### Master
 
-Develop: [![CircleCI](https://circleci.com/gh/farmsmart/farmsmart-firebase.svg?style=svg)](https://circleci.com/gh/farmsmart/farmsmart-firebase)
+[![CircleCI](https://circleci.com/gh/farmsmart/farmsmart-firebase/tree/master.svg?style=svg)](https://circleci.com/gh/farmsmart/farmsmart-firebase/tree/master)
+
+#### Develop
+
+[![CircleCI](https://circleci.com/gh/farmsmart/farmsmart-firebase.svg?style=svg)](https://circleci.com/gh/farmsmart/farmsmart-firebase)
+
+[![codecov](https://codecov.io/gh/farmsmart/farmsmart-firebase/branch/develop/graph/badge.svg)](https://codecov.io/gh/farmsmart/farmsmart-firebase)
 
 The FarmSmart is a mobile app providing tailored recommendations to farmers based on their location,
 starting season, farming purpose (such as for profit), as well as details about their land.
