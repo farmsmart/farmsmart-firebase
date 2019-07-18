@@ -100,6 +100,11 @@ jobs:
           command: |
             npm run-script lint
             npm run-script test:ci
+      - run:
+          working_directory: *working_dir
+          name: Upload coverage report to codecov
+          command: |
+            ./functions/node_modules/.bin/codecov --token="$CODECOV_TOKEN"
       - store_test_results: 
           path: /tmp/workspace/farmsmart/functions/reports
 
