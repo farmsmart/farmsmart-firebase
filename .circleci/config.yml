@@ -19,9 +19,6 @@ references:
       paths:
         - farmsmart
 
-orbs:
-  codecov: codecov/codecov@1.0.2
-
 executors:
   gcp-firebase:
     docker:
