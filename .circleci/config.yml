@@ -28,6 +28,10 @@ executors:
     docker:
       - image: farmsmart/gcp-firebase-emulator
     working_directory: *working_dir
+  static-analysis:
+    docker:
+      - image: farmsmart/static-analysis
+    working_directory: *functions_dir
 
 jobs:
   build:
@@ -53,6 +57,21 @@ jobs:
             npm install
 
       - *save_workspace
+  
+  static-scan:
+    executor: static-analysis
+    steps:
+      - *restore_workspace
+      - run: 
+          name: Run static code analysis
+          command: |
+            set -euo pipefail
+            sonar-scanner \
+              -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.organization=farmsmart \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=$SONAR_HOST \
+              -Dsonar.login=$SONAR_LOGIN
   
   credentials:
     executor: gcp-firebase
@@ -187,6 +206,10 @@ workflows:
             tags:
               only: /.*/
 
+      - static-analysis:
+          context: sonar
+          requires:
+            - build
 
       - credentials:
           name: prepare-feature
