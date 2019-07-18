@@ -73,7 +73,7 @@ jobs:
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.exclusions=".credentials/**,test/**,**/*.unit.test.js,**/*.spec.js"
+              -Dsonar.exclusions=".credentials/**"
   
   credentials:
     executor: gcp-firebase
