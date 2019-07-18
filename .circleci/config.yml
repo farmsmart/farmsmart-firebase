@@ -67,12 +67,13 @@ jobs:
           command: |
             set -euo pipefail
             sonar-scanner \
+              -Dsonar.branch.name=$CIRCLE_BRANCH \
               -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
               -Dsonar.organization=farmsmart \
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.exclusions=./credentials**, node_modules/**, test/**, **/*.unit.test.js, **/*.spec.js
+              -Dsonar.exclusions=".credentials/**,node_modules/**,test/**,**/*.unit.test.js,**/*.spec.js"
   
   credentials:
     executor: gcp-firebase
@@ -285,7 +286,7 @@ workflows:
       - static-scan:
           context: sonar
           requires:
-            - test-functions
+            - build
 
       - test-rules:
           requires:
