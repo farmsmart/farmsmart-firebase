@@ -206,7 +206,7 @@ workflows:
             tags:
               only: /.*/
 
-      - static-analysis:
+      - static-scan:
           context: sonar
           requires:
             - build
