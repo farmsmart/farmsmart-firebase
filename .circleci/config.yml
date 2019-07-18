@@ -19,6 +19,9 @@ references:
       paths:
         - farmsmart
 
+orbs:
+  codecov: codecov/codecov@1.0.2
+
 executors:
   gcp-firebase:
     docker:
@@ -100,6 +103,11 @@ jobs:
           command: |
             npm run-script lint
             npm run-script test:ci
+      - run:
+          working_directory: *functions_dir
+          name: Upload coverage report to codecov
+          command: |
+            ./node_modules/.bin/codecov --token="$CODECOV_TOKEN"
       - store_test_results: 
           path: /tmp/workspace/farmsmart/functions/reports
 
