@@ -74,8 +74,8 @@ jobs:
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.junit.reportsPath=/tmp/workspace/farmsmart/functions/reports \
-              -Dsonar.clover.reportPath=coverage/clover.xml \
+              -Dsonar.javascript.lcov.reportPaths=coverage \
+              -Dsonar.junit.reportsPaths=/tmp/workspace/farmsmart/functions/reports \
               -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
               #-Dsonar.branch.name=$CIRCLE_BRANCH \  
             
