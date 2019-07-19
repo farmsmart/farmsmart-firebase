@@ -66,15 +66,16 @@ jobs:
           name: Run static code analysis
           command: |
             set -euo pipefail
+            # See limitations on short-lived branches
+            # https://docs.sonarqube.org/latest/branches/short-lived-branches/
             sonar-scanner \
               -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
               -Dsonar.organization=farmsmart \
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.exclusions=.credentials/**,**/*.unit.test.js,**/*.spec.js
-  
-            #-Dsonar.branch.name=$CIRCLE_BRANCH \  
+              -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
+              #-Dsonar.branch.name=$CIRCLE_BRANCH \  
             
   credentials:
     executor: gcp-firebase
@@ -129,6 +130,7 @@ jobs:
             ./functions/node_modules/.bin/codecov --token="$CODECOV_TOKEN"
       - store_test_results: 
           path: /tmp/workspace/farmsmart/functions/reports
+      - *save_workspace
 
   test-functions-integration:
     executor: gcp-firebase-emulator
@@ -287,7 +289,7 @@ workflows:
       - static-scan:
           context: sonar
           requires:
-            - build
+            - test-functions
 
       - test-rules:
           requires:
