@@ -72,8 +72,8 @@ jobs:
               -Dsonar.organization=farmsmart \
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
-              -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.exclusions=".credentials/**,**/*.unit.test.js"
+              -Dsonar.login=$SONAR_LOGIN 
+            #  -Dsonar.exclusions=".credentials/**,**/*.unit.test.js"
   
   credentials:
     executor: gcp-firebase
