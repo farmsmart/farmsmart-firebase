@@ -28,6 +28,10 @@ executors:
     docker:
       - image: farmsmart/gcp-firebase-emulator
     working_directory: *working_dir
+  static-analysis:
+    docker:
+      - image: farmsmart/static-analysis
+    working_directory: *functions_dir
 
 jobs:
   build:
@@ -54,6 +58,30 @@ jobs:
 
       - *save_workspace
   
+  static-scan:
+    executor: static-analysis
+    steps:
+      - *restore_workspace
+      - run: 
+          name: Run static code analysis
+          command: |
+            set -euo pipefail
+            
+            # See limitations on short-lived branches
+            # https://docs.sonarqube.org/latest/branches/short-lived-branches/
+
+            sonar-scanner \
+              -Dsonar.branch.name=$CIRCLE_BRANCH \
+              -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.organization=farmsmart \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=$SONAR_HOST \
+              -Dsonar.login=$SONAR_LOGIN \
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+              -Dsonar.junit.reportPaths=/tmp/workspace/farmsmart/functions/reports \
+              -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
+              
+            
   credentials:
     executor: gcp-firebase
     steps:
@@ -107,6 +135,7 @@ jobs:
             ./functions/node_modules/.bin/codecov --token="$CODECOV_TOKEN"
       - store_test_results: 
           path: /tmp/workspace/farmsmart/functions/reports
+      - *save_workspace
 
   test-functions-integration:
     executor: gcp-firebase-emulator
@@ -187,7 +216,6 @@ workflows:
             tags:
               only: /.*/
 
-
       - credentials:
           name: prepare-feature
           context: gcp-feature
@@ -262,6 +290,11 @@ workflows:
           filters:
             tags:
               only: /.*/
+
+      - static-scan:
+          context: sonar
+          requires:
+            - test-functions
 
       - test-rules:
           requires:
