@@ -76,7 +76,7 @@ jobs:
               -Dsonar.login=$SONAR_LOGIN \
               -Dsonar.branch.name=$CIRCLE_BRANCH \  
               -Dsonar.javascript.lcov.reportPaths=coverage \
-              -Dsonar.junit.reportsPaths=/tmp/workspace/farmsmart/functions/reports \
+              -Dsonar.junit.reportPaths=/tmp/workspace/farmsmart/functions/reports \
               -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
               
             
