@@ -66,18 +66,21 @@ jobs:
           name: Run static code analysis
           command: |
             set -euo pipefail
+            
             # See limitations on short-lived branches
             # https://docs.sonarqube.org/latest/branches/short-lived-branches/
+
             sonar-scanner \
               -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
               -Dsonar.organization=farmsmart \
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.branch.name=$CIRCLE_BRANCH \  
               -Dsonar.javascript.lcov.reportPaths=coverage \
               -Dsonar.junit.reportPaths=/tmp/workspace/farmsmart/functions/reports \
               -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
+
+              #-Dsonar.branch.name=$CIRCLE_BRANCH \  
               
             
   credentials:
