@@ -7,8 +7,8 @@
 #### Develop
 
 [![CircleCI](https://circleci.com/gh/farmsmart/farmsmart-firebase.svg?style=svg)](https://circleci.com/gh/farmsmart/farmsmart-firebase)
-
 [![codecov](https://codecov.io/gh/farmsmart/farmsmart-firebase/branch/develop/graph/badge.svg)](https://codecov.io/gh/farmsmart/farmsmart-firebase)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=farmsmart_farmsmart-firebase&metric=alert_status)](https://sonarcloud.io/dashboard?id=farmsmart_farmsmart-firebase)
 
 The FarmSmart is a mobile app providing tailored recommendations to farmers based on their location,
 starting season, farming purpose (such as for profit), as well as details about their land.
