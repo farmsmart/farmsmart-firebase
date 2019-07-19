@@ -67,12 +67,12 @@ jobs:
           command: |
             set -euo pipefail
             sonar-scanner \
-              -Dsonar.branch.name=$CIRCLE_BRANCH \
               -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
               -Dsonar.organization=farmsmart \
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN 
+            #-Dsonar.branch.name=$CIRCLE_BRANCH \  
             #  -Dsonar.exclusions=".credentials/**,**/*.unit.test.js"
   
   credentials:
