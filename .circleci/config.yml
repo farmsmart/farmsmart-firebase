@@ -71,6 +71,7 @@ jobs:
             # https://docs.sonarqube.org/latest/branches/short-lived-branches/
 
             sonar-scanner \
+              -Dsonar.branch.name=$CIRCLE_BRANCH \  
               -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
               -Dsonar.organization=farmsmart \
               -Dsonar.sources=. \
@@ -79,8 +80,6 @@ jobs:
               -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
               -Dsonar.junit.reportPaths=/tmp/workspace/farmsmart/functions/reports \
               -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
-
-              #-Dsonar.branch.name=$CIRCLE_BRANCH \  
               
             
   credentials:
