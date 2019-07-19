@@ -76,7 +76,7 @@ jobs:
               -Dsonar.sources=. \
               -Dsonar.host.url=$SONAR_HOST \
               -Dsonar.login=$SONAR_LOGIN \
-              -Dsonar.javascript.lcov.reportPaths=coverage \
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
               -Dsonar.junit.reportPaths=/tmp/workspace/farmsmart/functions/reports \
               -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
 
