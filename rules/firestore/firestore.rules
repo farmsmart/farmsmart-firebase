@@ -35,8 +35,8 @@ service cloud.firestore {
     }
     
     match /{collection}/{document=**} {
-      allow read: if isCms(collection) && isLoggedIn() && !isAnonymous() && isVerified();
-      allow write: if isCms(collection) && isLoggedIn() && !isAnonymous() && isVerified();
+      allow read: if isCms(collection) && isLoggedIn() && !isAnonymous();
+      allow write: if isCms(collection) && isLoggedIn() && !isAnonymous();
     }
 
     match /fs_crop_scores/{document} {
