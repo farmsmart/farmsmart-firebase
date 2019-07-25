@@ -1,6 +1,11 @@
 const firebase = require('@firebase/testing');
 const fs = require('fs');
-const { fl_collections, fs_app_collections, fs_service_collections } = require('./collections');
+const {
+  fl_public_collections,
+  fl_collections,
+  fs_app_collections,
+  fs_service_collections,
+} = require('./collections');
 
 const projectId = `project-${Date.now()}`;
 
@@ -13,13 +18,23 @@ describe('Firestore rules for authenticated app requests', () => {
       projectId: projectId,
     });
 
+    fl_public_collections.map(adminWrite);
     fl_collections.map(adminWrite);
     fs_app_collections.map(adminWrite);
     fs_service_collections.map(adminWrite);
 
     mobileApp = await firebase.initializeTestApp({
       projectId: projectId,
-      auth: { uid: 'alice', email: 'alice@example.com' },
+      auth: {
+        uid: 'alice',
+        email: 'alice@example.com',
+        token: {
+          email_verified: false,
+          firebase: {
+            sign_in_provider: 'email',
+          },
+        },
+      },
     });
 
     await firebase.loadFirestoreRules({
@@ -32,9 +47,19 @@ describe('Firestore rules for authenticated app requests', () => {
     await Promise.all(firebase.apps().map(app => app.delete()));
   });
 
-  describe.each(fl_collections)('%p ', collection => {
+  describe.each(fl_public_collections)('%p ', collection => {
     it('should allow read', async () => {
       await firebase.assertSucceeds(mobileAppRead(collection));
+    });
+
+    it('should deny write', async () => {
+      await firebase.assertFails(mobileAppWrite(collection));
+    });
+  });
+
+  describe.each(fl_collections)('%p ', collection => {
+    it('should deny read', async () => {
+      await firebase.assertFails(mobileAppRead(collection));
     });
 
     it('should deny write', async () => {

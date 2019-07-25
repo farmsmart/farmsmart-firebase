@@ -1,60 +1,49 @@
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
     function hasReadAccess() {
       return true;
     }
-
-    function isFlamelinkUser() {
-      return exists(/databases/$(database)/documents/fl_users/$(request.auth.uid));
+    
+    function isLoggedIn() {
+      return request.auth != null;
     }
-
-    match /fl_content/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
-    } 
-
-    match /fl_environments/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
     }
-
-    match /fl_files/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    function isAnonymous() {
+    	return request.auth.token.firebase.sign_in_provider == 'anonymous';
     }
-
-    match /fl_folders/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    function isVerified() {
+    	return request.auth.token.email_verified;
     }
-
-    match /fl_locales/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    function isCms(collection) {
+    	return collection.matches('^fl.*');
     }
-
-    match /fl_permissions/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    match /fl_content/{document=**} {
+    	allow read: if hasReadAccess();
     }
-
-    match /fl_schemas/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    match /fl_files/{document=**} {
+    	allow read: if hasReadAccess();
     }
-
-    match /fl_settings/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
-    }
-
-    match /fl_users/{document} {
-      allow read: if hasReadAccess();
-      allow write: if isFlamelinkUser();
+    
+    match /{collection}/{document=**} {
+      allow read: if isCms(collection) && isLoggedIn() && !isAnonymous() && isVerified();
+      allow write: if isCms(collection) && isLoggedIn() && !isAnonymous() && isVerified();
     }
 
     match /fs_crop_scores/{document} {
+      allow read: if hasReadAccess();
+    }
+    
+    match /fs_factors/{document} {
       allow read: if hasReadAccess();
     }
 
@@ -63,7 +52,7 @@ service cloud.firestore {
     }
 
     match /fs_users/{userId}/{document=**} {
-      allow read, write: if request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }       
   }
 }
