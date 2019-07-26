@@ -63,7 +63,7 @@ exports.writeScoreToFireStore = function(scoreData, sheetId, db, collection) {
   }
 };
 
-exports.updateSpreadsheet = async function(infoRef, spreadsheet) {
+exports.updateSpreadsheet = async function(db, infoRef, spreadsheet) {
   return db.runTransaction(tx => {
     spreadsheet.lastFetch = score_repository.createDate(new Date());
     tx.set(infoRef, spreadsheet);

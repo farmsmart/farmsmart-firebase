@@ -41,7 +41,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     // It is possible to have multiple spreadsheets by passing in a different id
     const db = admin.firestore();
     const infoRef = db.collection(SHEET_INFO_COLLECTION).doc(sheetId);
-    await score_repository.updateSpreadsheet(infoRef, spreadsheet);
+    await score_repository.updateSpreadsheet(db, infoRef, spreadsheet);
 
     let crops = [];
     if (spreadsheet.scoreMatrix) {
