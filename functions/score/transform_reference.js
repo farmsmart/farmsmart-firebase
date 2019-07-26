@@ -23,7 +23,7 @@ exports.transformFactors = function(data) {
 
     rowValues.forEach((value, index) => {
       if (value && index < factors.length) {
-        factorsBuilder.addRatingFromString(factors[index], value);
+        factorsBuilder.addRatingFromString(factors[index], value, 0);
       }
     });
   }
