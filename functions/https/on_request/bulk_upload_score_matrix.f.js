@@ -73,7 +73,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         apiKey
       );
       const factors = transform_reference.transformFactors(sheetData);
-      console.log(`Processing ${cropsData.length} reference`);
+      console.log(`Processing factors reference`);
 
       await score_repository.writeScoreToFireStore(factors, sheetId, db, REF_COLLECTION);
     }

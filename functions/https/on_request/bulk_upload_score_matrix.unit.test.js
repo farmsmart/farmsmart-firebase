@@ -5,6 +5,7 @@ const score_repository = require('../../score/score_repository');
 const sheets_helper = require('../../score/sheets_helper');
 const transform_info = require('../../score/transform_info');
 const transform_score = require('../../score/transform_scorev2');
+const transform_reference = require('../../score/transform_reference');
 
 describe('htts On Request upload Score Matrix', () => {
   let wrapped;
@@ -37,8 +38,12 @@ describe('htts On Request upload Score Matrix', () => {
 
     jest.spyOn(sheets_helper, 'fetchSheetValues').mockReturnValue(Promise.resolve({}));
 
-    let fetchSpreadsheet = jest
+    const fetchSpreadsheet = jest
       .spyOn(sheets_helper, 'fetchSpreadsheet')
+      .mockReturnValue(Promise.resolve({}));
+
+    const writeScoreToFireStore = jest
+      .spyOn(score_repository, 'writeScoreToFireStore')
       .mockReturnValue(Promise.resolve({}));
 
     test.mockConfig({
@@ -80,10 +85,12 @@ describe('htts On Request upload Score Matrix', () => {
     ];
 
     jest.spyOn(transform_score, 'transformCropScores').mockReturnValue(score_data);
+    jest.spyOn(transform_reference, 'transformFactors').mockReturnValue(score_data);
 
     jest.spyOn(transform_info, 'transformSpreadsheetDoc').mockReturnValue({
       cropSheets: [{}],
       scoreMatrix: 'SCORE MATRIX',
+      reference: 'Reference',
     });
 
     request = {
@@ -110,6 +117,7 @@ describe('htts On Request upload Score Matrix', () => {
 
     expect(authCall).toHaveBeenCalled();
     expect(fetchSpreadsheet).toHaveBeenCalled();
+    //expect(writeScoreToFireStore).toHaveBeenCalled();
     done();
   });
 });
