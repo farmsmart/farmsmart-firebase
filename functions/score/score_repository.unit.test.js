@@ -34,76 +34,78 @@ describe('Score repository', () => {
     done();
   });
 
-  test('should not create if score does not exist', async done => {
-    let document = jest.fn().mockImplementation(() => ({
-      get: jest.fn().mockImplementation(() => ({
-        exists: false,
-      })),
-    }));
+  describe('Create Links for Scores', () => {
+    test('should not create if score does not exist', async done => {
+      let document = jest.fn().mockImplementation(() => ({
+        get: jest.fn().mockImplementation(() => ({
+          exists: false,
+        })),
+      }));
 
-    let scoresRef = {
-      doc: document,
-    };
-    let linksRef = {};
-    let cropName = 'NAME',
-      cmsDocId = '1',
-      cmsLocale = 'en-US',
-      cmsEnvironment = 'production';
+      let scoresRef = {
+        doc: document,
+      };
+      let linksRef = {};
+      let cropName = 'NAME',
+        cmsDocId = '1',
+        cmsLocale = 'en-US',
+        cmsEnvironment = 'production';
 
-    await repository.createLinkIfScoreExists(
-      scoresRef,
-      linksRef,
-      cropName,
-      cmsDocId,
-      cmsLocale,
-      cmsEnvironment
-    );
+      await repository.createLinkIfScoreExists(
+        scoresRef,
+        linksRef,
+        cropName,
+        cmsDocId,
+        cmsLocale,
+        cmsEnvironment
+      );
 
-    expect(document).toBeCalled();
+      expect(document).toBeCalled();
 
-    done();
+      done();
+    });
+
+    test('should create if a score exist', async done => {
+      let document = jest.fn().mockImplementation(() => ({
+        get: jest.fn().mockImplementation(() => ({
+          exists: true,
+        })),
+      }));
+
+      let scoresRef = {
+        doc: document,
+      };
+
+      let updateDocument = jest.fn();
+      let linkDocument = jest.fn().mockImplementation(() => ({
+        set: updateDocument,
+      }));
+
+      let linksRef = {
+        doc: linkDocument,
+      };
+      let cropName = 'NAME',
+        cmsDocId = '1',
+        cmsLocale = 'en-US',
+        cmsEnvironment = 'production';
+
+      await repository.createLinkIfScoreExists(
+        scoresRef,
+        linksRef,
+        cropName,
+        cmsDocId,
+        cmsLocale,
+        cmsEnvironment
+      );
+
+      expect(document).toBeCalled();
+      expect(linkDocument).toBeCalled();
+      expect(updateDocument).toBeCalled();
+      done();
+    });
   });
 
-  test('should create if a score exist', async done => {
-    let document = jest.fn().mockImplementation(() => ({
-      get: jest.fn().mockImplementation(() => ({
-        exists: true,
-      })),
-    }));
-
-    let scoresRef = {
-      doc: document,
-    };
-
-    let updateDocument = jest.fn();
-    let linkDocument = jest.fn().mockImplementation(() => ({
-      set: updateDocument,
-    }));
-
-    let linksRef = {
-      doc: linkDocument,
-    };
-    let cropName = 'NAME',
-      cmsDocId = '1',
-      cmsLocale = 'en-US',
-      cmsEnvironment = 'production';
-
-    await repository.createLinkIfScoreExists(
-      scoresRef,
-      linksRef,
-      cropName,
-      cmsDocId,
-      cmsLocale,
-      cmsEnvironment
-    );
-
-    expect(document).toBeCalled();
-    expect(linkDocument).toBeCalled();
-    expect(updateDocument).toBeCalled();
-    done();
-  });
-
-  describe('Test deleting Orhan Crop Scores', () => {
+  describe('Deleting Orphaned Crop Scores', () => {
     // given
     const snapshot = jest.fn().mockImplementation(() => ({
       get: jest.fn().mockImplementation(() => ({
@@ -149,7 +151,7 @@ describe('Score repository', () => {
       done();
     });
 
-    test('should not delete there are no crops', async done => {
+    test('should not delete if there are no crops', async done => {
       const snapshot = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
           empty: true,
@@ -170,6 +172,71 @@ describe('Score repository', () => {
       expect(deleteFn).toHaveBeenCalledTimes(0);
 
       done();
+    });
+  });
+
+  describe('Update spreasheet', () => {
+    test('should start transaction to update spreadsheet', async () => {
+      const spreadsheet = {};
+
+      const db = {
+        runTransaction: jest.fn().mockImplementation(),
+      };
+
+      const ref = {};
+
+      // when
+      await repository.updateSpreadsheet(db, ref, spreadsheet);
+
+      // then
+      expect(db.runTransaction).toBeCalled();
+    });
+  });
+
+  describe('Write score to firestore', () => {
+    test('should reject crop is missing a name', async () => {
+      const db = {
+        runTransaction: jest.fn().mockImplementation(),
+      };
+
+      const scoreData = {};
+
+      const sheetId = 'ABC';
+
+      const collection = 'TEST';
+
+      try {
+        // when
+        await repository.writeScoreToFireStore(scoreData, sheetId, db, collection);
+        fail('Expecting an error to be thrown');
+      } catch (err) {}
+
+      expect(db.runTransaction).toHaveBeenCalledTimes(0);
+    });
+
+    test('should write to firestore', async () => {
+      const docRef = jest.fn().mockImplementation();
+
+      const db = {
+        runTransaction: jest.fn().mockImplementation(),
+        collection: jest.fn().mockImplementation(() => ({
+          doc: docRef,
+        })),
+      };
+
+      const scoreData = {
+        crop: {
+          name: 'TEST',
+        },
+      };
+
+      const sheetId = 'ABC';
+
+      const collection = 'TEST';
+
+      await repository.writeScoreToFireStore(scoreData, sheetId, db, collection);
+
+      expect(db.runTransaction).toHaveBeenCalledTimes(1);
     });
   });
 });
