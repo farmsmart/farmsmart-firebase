@@ -104,6 +104,8 @@ describe('Link crop scores to crops on write', () => {
     // create crop change with published translated crop
     await wrappedLinkCropscore(change(translatedCrop, translatedId));
 
+    await new Promise(done => setTimeout(done, 1000));
+
     // assert link not created
     const link = await firestore.getDocument(linkPath(translatedId));
     expect(link.exists).toBe(false);
