@@ -98,8 +98,12 @@ describe('Link crop scores to crops on write', () => {
     // insert translated crop
     await firestore.writeDocument(cropPath(translatedId), translatedCrop);
 
+    await new Promise(done => setTimeout(done, 500));
+
     // insert score data
     await firestore.writeDocument(scorePath(mainName), { crop: { name: mainName } });
+
+    await new Promise(done => setTimeout(done, 500));
 
     // create crop change with published translated crop
     await wrappedLinkCropscore(change(translatedCrop, translatedId));
