@@ -6,6 +6,7 @@ const sheets_helper = require('../../score/sheets_helper');
 const score_repository = require('../../score/score_repository');
 const transform_info = require('../../score/transform_info');
 const transform_score = require('../../score/transform_scorev2');
+const transform_reference = require('../../score/transform_reference');
 
 try {
   admin.initializeApp();
@@ -15,12 +16,16 @@ try {
 
 exports = module.exports = functions.https.onRequest(handleBulkUploadScoreBySpreadsheet);
 
+const SCORES_COLLECTION = 'fs_crop_scores';
+const REF_COLLECTION = 'fs_factors';
+const SHEET_INFO_COLLECTION = 'fs_score_info';
+
 async function handleBulkUploadScoreBySpreadsheet(request, response) {
   try {
     const apiKey = functions.config().farmsmart.sheets.api.key;
 
     // Simple check to ensure that sheetId is the same as the configured sheet
-    let sheetId = request.query.sheetId;
+    const sheetId = request.query.sheetId;
     if (!request.query.sheetId || sheetId != functions.config().farmsmart.scorematrix.doc.id) {
       throw Error('Missing or Invalid spreadsheet');
     }
@@ -28,41 +33,16 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     const apiauth = await sheets_helper.authenticateServiceAccount();
 
     console.log(`Processing worksheet ${sheetId}`);
-
-    const spreadsheet = await sheets_helper
-      .fetchSpreadsheet(sheetId, apiauth, apiKey)
-      .then(data => {
-        const result = transform_info.transformSpreadsheetDoc(data);
-        console.log('Fetched spreadsheet');
-        return Promise.resolve(result);
-      });
+    const data = await sheets_helper.fetchSpreadsheet(sheetId, apiauth, apiKey);
+    const spreadsheet = transform_info.transformSpreadsheetDoc(data);
+    console.log('Fetched spreadsheet information');
 
     // Update the record of the spreadsheet document into fs_score_info
     // It is possible to have multiple spreadsheets by passing in a different id
     const db = admin.firestore();
-    const infoRef = db.collection(`fs_score_info`).doc(sheetId);
-    await db.runTransaction(tx => {
-      spreadsheet.lastFetch = score_repository.createDate(new Date());
-      tx.set(infoRef, spreadsheet);
-      return Promise.resolve(true);
-    });
+    const infoRef = db.collection(SHEET_INFO_COLLECTION).doc(sheetId);
+    await score_repository.updateSpreadsheet(infoRef, spreadsheet);
 
-    const writeScoreToFireStore = scoreData => {
-      if (!scoreData.crop.name) {
-        return Promise.reject(new Error(`Transformed document is invalid`));
-      } else {
-        let scoreRef = db.collection(`fs_crop_scores`).doc(scoreData.crop.name);
-        return db.runTransaction(tx => {
-          console.log(`Writing crop score to FireStore: ${scoreData.crop.name}`);
-          scoreData.meta = {
-            spreadsheetId: sheetId,
-            updated: score_repository.createDate(new Date()),
-          };
-          tx.set(scoreRef, scoreData);
-          return Promise.resolve(scoreData.crop.name);
-        });
-      }
-    };
     let crops = [];
     if (spreadsheet.scoreMatrix) {
       const sheetData = await sheets_helper.fetchSheetValues(
@@ -74,11 +54,28 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
       const cropsData = transform_score.transformCropScores(sheetData);
       console.log(`Processing ${cropsData.length} crop scores`);
 
-      crops = await Promise.all(cropsData.map(crop => writeScoreToFireStore(crop)));
+      crops = await Promise.all(
+        cropsData.map(crop =>
+          score_repository.writeScoreToFireStore(crop, sheetId, db, SCORES_COLLECTION)
+        )
+      );
       console.log(`Uploaded crop scores: ${crops}`);
 
       // Delete any crop record that is not in the spreadsheet.
-      score_repository.deleteOrphanCropScores(db.collection(`fs_crop_scores`), sheetId, crops);
+      score_repository.deleteOrphanCropScores(db.collection(SCORES_COLLECTION), sheetId, crops);
+    }
+
+    if (spreadsheet.reference) {
+      const sheetData = await sheets_helper.fetchSheetValues(
+        spreadsheet.reference,
+        apiauth,
+        sheetId,
+        apiKey
+      );
+      const factors = transform_reference.transformFactors(sheetData);
+      console.log(`Processing ${cropsData.length} reference`);
+
+      await score_repository.writeScoreToFireStore(factors, sheetId, db, REF_COLLECTION);
     }
 
     console.log('Successfully processed spreadsheet');

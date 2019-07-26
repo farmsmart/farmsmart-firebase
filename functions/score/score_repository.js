@@ -45,3 +45,28 @@ exports.deleteOrphanCropScores = async function(cropScoreRef, sheetId, newCrops)
     cropsToRemove.map(crop => cropScoreRef.doc(crop).delete());
   }
 };
+
+exports.writeScoreToFireStore = function(scoreData, sheetId, db, collection) {
+  if (!scoreData.crop.name) {
+    return Promise.reject(new Error(`Transformed document is invalid`));
+  } else {
+    const scoreRef = db.collection(collection).doc(scoreData.crop.name);
+    return db.runTransaction(tx => {
+      console.log(`Writing crop score to FireStore: ${scoreData.crop.name}`);
+      scoreData.meta = {
+        spreadsheetId: sheetId,
+        updated: createDate(new Date()),
+      };
+      tx.set(scoreRef, scoreData);
+      return Promise.resolve(scoreData.crop.name);
+    });
+  }
+};
+
+exports.updateSpreadsheet = async function(infoRef, spreadsheet) {
+  return db.runTransaction(tx => {
+    spreadsheet.lastFetch = score_repository.createDate(new Date());
+    tx.set(infoRef, spreadsheet);
+    return Promise.resolve(true);
+  });
+};
