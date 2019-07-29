@@ -28,6 +28,10 @@ executors:
     docker:
       - image: farmsmart/gcp-firebase-emulator
     working_directory: *working_dir
+  static-analysis:
+    docker:
+      - image: farmsmart/static-analysis
+    working_directory: *functions_dir
 
 jobs:
   build:
@@ -54,13 +58,37 @@ jobs:
 
       - *save_workspace
   
+  static-scan:
+    executor: static-analysis
+    steps:
+      - *restore_workspace
+      - run: 
+          name: Run static code analysis
+          command: |
+            set -euo pipefail
+            
+            # See limitations on short-lived branches
+            # https://docs.sonarqube.org/latest/branches/short-lived-branches/
+
+            sonar-scanner \
+              -Dsonar.branch.name=$CIRCLE_BRANCH \
+              -Dsonar.projectKey=farmsmart_$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.organization=farmsmart \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=$SONAR_HOST \
+              -Dsonar.login=$SONAR_LOGIN \
+              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+              -Dsonar.junit.reportPaths=/tmp/workspace/farmsmart/functions/reports \
+              -Dsonar.exclusions=test/**/*,.credentials/**/*,**/*.unit.test.js,**/*.spec.js
+              
+            
   credentials:
     executor: gcp-firebase
     steps:
       - *restore_workspace
       - run:
-          working_directory: *functions_dir
-          name: Inject credentials for integration
+          working_directory: *working_dir
+          name: Prepare credentials for integration tests
           command: |
             set -euo pipefail
             secrets_dir='.credentials'
@@ -68,7 +96,7 @@ jobs:
             echo ${TESTING_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/testing-service-account-key.json
       - run:
           working_directory: *functions_dir
-          name: Inject credentials for spreadsheet user
+          name: Prepare credentials for spreadsheet user account
           command: |
             set -euo pipefail
             secrets_dir='.credentials'
@@ -76,7 +104,7 @@ jobs:
             echo ${SHEETS_SERVICE_ACCOUNT} | base64 -di > ${secrets_dir}/recommendations-service-account.json
       - run:
           working_directory: *working_dir
-          name: Inject env variables
+          name: Prepare env variables
           command: |
             set -euo pipefail
             echo "export FIREBASE_TOKEN=${FIREBASE_TOKEN}" >> ./env.sh
@@ -100,13 +128,24 @@ jobs:
           command: |
             npm run-script lint
             npm run-script test:ci
+      - run:
+          working_directory: *working_dir
+          name: Upload coverage report to codecov
+          command: |
+            ./functions/node_modules/.bin/codecov --token="$CODECOV_TOKEN"
       - store_test_results: 
           path: /tmp/workspace/farmsmart/functions/reports
+      - *save_workspace
 
   test-functions-integration:
     executor: gcp-firebase-emulator
     steps:
       - *restore_workspace
+      - run:
+          working_directory: *working_dir
+          name: Inject testing credentials used by the emulated tests
+          command: |
+            cp ./.credentials/testing-service-account-key.json ./functions/.credentials/
       - run: 
           name: Start firestore emulator in the background
           background: true
@@ -176,7 +215,6 @@ workflows:
           filters:
             tags:
               only: /.*/
-
 
       - credentials:
           name: prepare-feature
@@ -252,6 +290,11 @@ workflows:
           filters:
             tags:
               only: /.*/
+
+      - static-scan:
+          context: sonar
+          requires:
+            - test-functions
 
       - test-rules:
           requires:
