@@ -29,7 +29,7 @@ exports.deleteLink = async function(linksRef, cmsDocId) {
 };
 
 exports.createDate = function() {
-  return admin.firestore.Timestamp.fromDate(new Date());
+  return toFirebaseDate(new Date());
 };
 
 exports.deleteOrphanCropScores = async function(cropScoreRef, sheetId, newCrops) {
@@ -45,3 +45,32 @@ exports.deleteOrphanCropScores = async function(cropScoreRef, sheetId, newCrops)
     cropsToRemove.map(crop => cropScoreRef.doc(crop).delete());
   }
 };
+
+exports.writeScoreToFireStore = function(scoreData, sheetId, db, collection) {
+  if (!scoreData.crop || !scoreData.crop.name) {
+    return Promise.reject(new Error(`Transformed document is invalid`));
+  } else {
+    const scoreRef = db.collection(collection).doc(scoreData.crop.name);
+    return db.runTransaction(tx => {
+      console.log(`Writing crop score to FireStore: ${scoreData.crop.name}`);
+      scoreData.meta = {
+        spreadsheetId: sheetId,
+        updated: toFirebaseDate(new Date()),
+      };
+      tx.set(scoreRef, scoreData);
+      return Promise.resolve(scoreData.crop.name);
+    });
+  }
+};
+
+exports.updateSpreadsheet = async function(db, infoRef, spreadsheet) {
+  return db.runTransaction(tx => {
+    spreadsheet.lastFetch = toFirebaseDate(new Date());
+    tx.set(infoRef, spreadsheet);
+    return Promise.resolve(true);
+  });
+};
+
+function toFirebaseDate(date) {
+  return admin.firestore.Timestamp.fromDate(date);
+}
