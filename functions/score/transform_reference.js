@@ -5,17 +5,18 @@ const tpl = {
   data: { col: 1, row: 1 },
 };
 
-exports.transformFactors = function(data) {
+exports.transformFactors = function(data, requestISO) {
   // Create a list of crop builders for all crops
   const factorsBuilder = new model.CropScoreBuilder();
 
-  factorsBuilder.setCrop('factors');
+  factorsBuilder.setCrop('factors' + '_' + requestISO.trim());
 
   const factors = data.values[tpl.names.row];
   factors.forEach(factor => factorsBuilder.addWeightingFromString(factor, 1));
 
   for (let row = tpl.data.row; row < data.values.length; row++) {
     const rowValues = data.values[row];
+    // eslint-disable-next-line eqeqeq
     if (rowValues.length == 0) {
       // stop processing if the length is not expected
       break;

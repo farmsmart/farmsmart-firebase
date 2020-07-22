@@ -2,10 +2,17 @@ const model = require('./score_model');
 
 const tpl = {
   names: { row: 0 },
-  data: { col: 1, row: 1, start: 2 },
+  data: { col: 1, row: 1, start: 3 },
   factor: { col: 0 },
   option: { col: 1 },
   weight: { col: 1 },
+  territory: { col: 2 },
+};
+
+exports.territoryLocale = function(data) {
+  const territoryPosition = 2;
+  let cropTerritoryLocale = data.values[territoryPosition][tpl.territory.col];
+  return cropTerritoryLocale;
 };
 
 exports.transformCropScores = function(data) {
@@ -14,11 +21,13 @@ exports.transformCropScores = function(data) {
   let cropNames = data.values[tpl.names.row].slice(tpl.data.start);
   for (let idx = 0; idx < cropNames.length; idx++) {
     let builder = new model.CropScoreBuilder();
-    builder.setCrop(cropNames[idx]);
+    const cropTerritory = this.territoryLocale(data).trim();
+    builder.setCrop(cropNames[idx].trim() + '_' + cropTerritory.trim(), cropTerritory);
     cropBuilders.push(builder);
   }
 
   for (let row = tpl.data.row; row < data.values.length; row++) {
+    // eslint-disable-next-line eqeqeq
     if (data.values[row].length == 0) {
       // stop processing if the length is not expected
       break;

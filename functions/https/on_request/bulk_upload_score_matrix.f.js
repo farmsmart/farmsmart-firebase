@@ -26,8 +26,11 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
 
     // Simple check to ensure that sheetId is the same as the configured sheet
     const sheetId = request.query.sheetId;
-    if (!request.query.sheetId || sheetId != functions.config().farmsmart.scorematrix.doc.id) {
-      throw Error('Missing or Invalid spreadsheet');
+    console.log('sheet id is :' + sheetId);
+    // eslint-disable-next-line eqeqeq
+    let matrixDocId;
+    if (!request.query.sheetId) {
+      throw Error('Missing spreadsheet');
     }
 
     const apiauth = await sheets_helper.authenticateServiceAccount();
@@ -44,6 +47,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     await score_repository.updateSpreadsheet(db, infoRef, spreadsheet);
 
     let crops = [];
+    let requestISO;
     if (spreadsheet.scoreMatrix) {
       const sheetData = await sheets_helper.fetchSheetValues(
         spreadsheet.scoreMatrix,
@@ -51,6 +55,18 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         sheetId,
         apiKey
       );
+
+      requestISO = transform_score.territoryLocale(sheetData);
+      for (let region of functions.config().farmsmart.scorematrix.docId.regions.region) {
+        if (region.countryISO === requestISO) {
+          matrixDocId = region.key;
+          break;
+        }
+      }
+      // validate sheetId matches with configured sheetId for a given region.
+      if (sheetId != matrixDocId) {
+        throw Error('Invalid spreadsheet for a given region.');
+      }
       const cropsData = transform_score.transformCropScores(sheetData);
       console.log(`Processing ${cropsData.length} crop scores`);
 
@@ -72,7 +88,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         sheetId,
         apiKey
       );
-      const factors = transform_reference.transformFactors(sheetData);
+      const factors = transform_reference.transformFactors(sheetData, requestISO);
       console.log(`Processing factors reference`);
 
       await score_repository.writeScoreToFireStore(factors, sheetId, db, REF_COLLECTION);
