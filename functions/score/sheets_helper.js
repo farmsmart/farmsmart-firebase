@@ -9,6 +9,7 @@ exports.authenticate = function() {
 
 exports.authenticateServiceAccount = function() {
   // For local: create gcp service account create the file locally before running or deploying
+  // const keys = require('../../.credentials/recommendations-service-account.json');
   const keys = require('../.credentials/recommendations-service-account.json');
   const client = new JWT(keys.client_email, null, keys.private_key, [
     'https://www.googleapis.com/auth/spreadsheets',
