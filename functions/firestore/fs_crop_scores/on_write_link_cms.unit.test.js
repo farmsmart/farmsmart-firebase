@@ -56,7 +56,8 @@ describe('fs_crop_scores On Write', () => {
       isDelete: true,
       doc: {
         crop: {
-          name: 'Tomato',
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
         },
       },
     });
@@ -94,7 +95,8 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          name: 'Tomato',
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
         },
       },
     });
@@ -119,9 +121,11 @@ describe('fs_crop_scores On Write', () => {
       .mockImplementationOnce(linksRefMock)
       .mockImplementationOnce(scoreRefMock);
 
-    let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
-      collection: collectionMock,
-    }));
+    let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() =>
+      Promise.resolve({
+        collection: collectionMock,
+      })
+    );
 
     await wrapped(cropScoreChange);
 
@@ -138,7 +142,8 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          name: 'Tomato',
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
         },
       },
     });
