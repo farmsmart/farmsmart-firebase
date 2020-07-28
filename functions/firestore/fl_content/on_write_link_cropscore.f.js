@@ -19,7 +19,6 @@ async function handleAttachCmsCropToCropScore(change, context) {
   const previous = change.before.data();
 
   const cmsCropChange = datahelper.getCmsCropChange(current, previous);
-
   if (!cmsCropChange || !cmsCropChange.isChange) {
     return null;
   }
@@ -58,6 +57,5 @@ async function handleAttachCmsCropToCropScore(change, context) {
       );
     }
   }
-
   return null;
 }

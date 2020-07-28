@@ -14,12 +14,19 @@ exports.createLinkIfScoreExists = async function(
   cmsLocale,
   cmsEnvironment
 ) {
-  const score = await scoresRef.doc(cropName).get();
-  if (score.exists) {
+  let scores = await buildCMSLinkCropScores(scoresRef, cropName);
+  console.log('Executing createLinkIfScoreExists');
+  if (JSON.stringify(scores) !== '{}') {
     console.log(`Creating crop link: ${cropName} to ${cmsDocId} in ${linksRef.path} `);
     await linksRef
       .doc(cmsDocId)
-      .set({ cropName: cropName, cmsCropId: cmsDocId, locale: cmsLocale, env: cmsEnvironment });
+      .set({
+        cropName: cropName,
+        cmsCropId: cmsDocId,
+        locale: cmsLocale,
+        env: cmsEnvironment,
+        scores,
+      });
   }
 };
 
@@ -70,6 +77,19 @@ exports.updateSpreadsheet = async function(db, infoRef, spreadsheet) {
     return Promise.resolve(true);
   });
 };
+
+async function buildCMSLinkCropScores(scoresRef, cropName) {
+  let docsSnapShot = await scoresRef.get().then(collection => {
+    return collection.docs.map(doc => doc.data());
+  });
+  let scoresObject = {};
+  for (let doc of docsSnapShot) {
+    if (doc.crop.qualifierName === cropName) {
+      scoresObject[doc.crop.region] = doc.crop.name;
+    }
+  }
+  return scoresObject;
+}
 
 function toFirebaseDate(date) {
   return admin.firestore.Timestamp.fromDate(date);

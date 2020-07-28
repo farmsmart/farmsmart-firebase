@@ -63,7 +63,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
           break;
         }
       }
-      // validate sheetId matches with configured sheetId for a given region.
+      // validate if sheetId matches with configured sheetId for a given region.
       if (sheetId != matrixDocId) {
         throw Error('Invalid spreadsheet for a given region.');
       }
@@ -75,6 +75,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
           score_repository.writeScoreToFireStore(crop, sheetId, db, SCORES_COLLECTION)
         )
       );
+
       console.log(`Uploaded crop scores: ${crops}`);
 
       // Delete any crop record that is not in the spreadsheet.

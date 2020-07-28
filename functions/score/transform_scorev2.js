@@ -22,7 +22,11 @@ exports.transformCropScores = function(data) {
   for (let idx = 0; idx < cropNames.length; idx++) {
     let builder = new model.CropScoreBuilder();
     const cropTerritory = this.territoryLocale(data).trim();
-    builder.setCrop(cropNames[idx].trim() + '_' + cropTerritory.trim(), cropTerritory);
+    builder.setCrop(
+      cropNames[idx].trim() + '_' + cropTerritory.trim(),
+      cropTerritory,
+      cropNames[idx]
+    );
     cropBuilders.push(builder);
   }
 
