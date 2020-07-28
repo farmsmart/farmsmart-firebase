@@ -47,6 +47,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
     let main = await cmsRef.doc(cmsCropChange.cropDocId).get();
     if (main.exists) {
       let crop = main.data().name;
+      //crop name should match scores qualifying name.
       await score_repository.createLinkIfScoreExists(
         scoresRef,
         linksRef,
