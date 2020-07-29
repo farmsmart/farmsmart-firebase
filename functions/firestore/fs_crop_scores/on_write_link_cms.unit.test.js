@@ -121,11 +121,9 @@ describe('fs_crop_scores On Write', () => {
       .mockImplementationOnce(linksRefMock)
       .mockImplementationOnce(scoreRefMock);
 
-    let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() =>
-      Promise.resolve({
-        collection: collectionMock,
-      })
-    );
+    let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
+      collection: collectionMock,
+    }));
 
     await wrapped(cropScoreChange);
 

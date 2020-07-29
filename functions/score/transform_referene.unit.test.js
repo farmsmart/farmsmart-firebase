@@ -15,8 +15,8 @@ describe('Transform Score Matrix', () => {
   describe('transforming reference', () => {
     test('should transform sample data.json', () => {
       let rawJson = require('./data/sheet_reference.json');
-
-      let data = transformer.transformFactors(rawJson);
+      let requestISO = 'KE';
+      let data = transformer.transformFactors(rawJson, requestISO);
 
       validateCrop(data);
     });
