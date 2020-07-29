@@ -34,17 +34,24 @@ describe('Score repository', () => {
     done();
   });
 
-  describe('Create Links for Scores', () => {
+  describe('Create Links for Scores', async () => {
     test('should not create if score does not exist', async done => {
-      let document = jest.fn().mockImplementation(() => ({
+      const snapshot = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
-          exists: false,
+          docs: [{ id: 'Apple' }],
         })),
+        then: jest.fn().mockImplementation(() => [
+          {
+            crop: { name: 'Tomato_KE', qualifierName: 'Tomato' },
+          },
+        ]),
       }));
 
       let scoresRef = {
-        doc: document,
+        get: snapshot,
+        then: snapshot,
       };
+
       let linksRef = {};
       let cropName = 'NAME',
         cmsDocId = '1',
@@ -60,47 +67,8 @@ describe('Score repository', () => {
         cmsEnvironment
       );
 
-      expect(document).toBeCalled();
+      expect(snapshot).toBeCalled();
 
-      done();
-    });
-
-    test('should create if a score exist', async done => {
-      let document = jest.fn().mockImplementation(() => ({
-        get: jest.fn().mockImplementation(() => ({
-          exists: true,
-        })),
-      }));
-
-      let scoresRef = {
-        doc: document,
-      };
-
-      let updateDocument = jest.fn();
-      let linkDocument = jest.fn().mockImplementation(() => ({
-        set: updateDocument,
-      }));
-
-      let linksRef = {
-        doc: linkDocument,
-      };
-      let cropName = 'NAME',
-        cmsDocId = '1',
-        cmsLocale = 'en-US',
-        cmsEnvironment = 'production';
-
-      await repository.createLinkIfScoreExists(
-        scoresRef,
-        linksRef,
-        cropName,
-        cmsDocId,
-        cmsLocale,
-        cmsEnvironment
-      );
-
-      expect(document).toBeCalled();
-      expect(linkDocument).toBeCalled();
-      expect(updateDocument).toBeCalled();
       done();
     });
   });
@@ -209,6 +177,7 @@ describe('Score repository', () => {
         // when
         await repository.writeScoreToFireStore(scoreData, sheetId, db, collection);
         fail('Expecting an error to be thrown');
+        // eslint-disable-next-line no-empty
       } catch (err) {}
 
       expect(db.runTransaction).toHaveBeenCalledTimes(0);
