@@ -49,22 +49,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       .where('name', '==', cropName)
       .get();
 
-    // To test locally,since flamelink CMS is not setup locally.
-    // let locale = 'en-Us';
-    // let environment = 'dev';
-    // const cropScoresRef = db.collection('fs_crop_scores');
-    // const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-    //
-    // await score_repository.createLinkIfScoreExists(
-    //     cropScoresRef,
-    //     cropScoreCmsLinkRef,
-    //     cropName,
-    //     'denimmmdsw',
-    //     locale,
-    //     environment
-    // );
-
-    // In reality there should only be one cms document found
+    //In reality there should only be one cms document found
     main.forEach(async mainDoc => {
       const multiCmsCrops = await db
         .collection('fl_content')
