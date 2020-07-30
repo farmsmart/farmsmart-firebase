@@ -64,7 +64,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         }
       }
       // validate if sheetId matches with configured sheetId for a given region.
-      if (sheetId != matrixDocId) {
+      if (sheetId !== matrixDocId) {
         throw Error('Invalid spreadsheet for a given region.');
       }
       const cropsData = transform_score.transformCropScores(sheetData);
