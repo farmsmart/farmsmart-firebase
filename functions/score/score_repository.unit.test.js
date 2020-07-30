@@ -34,7 +34,7 @@ describe('Score repository', () => {
     done();
   });
 
-  describe('Create Links for Scores', async () => {
+  describe('Create Links for Scores', () => {
     test('should not create if score does not exist', async done => {
       const snapshot = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
