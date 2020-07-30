@@ -71,6 +71,50 @@ describe('Score repository', () => {
 
       done();
     });
+
+    test('should create if a score exist', async done => {
+      const snapshot = jest.fn().mockImplementation(() => ({
+        get: jest.fn().mockImplementation(() => ({
+          docs: [{ id: 'Apple' }],
+        })),
+        then: jest.fn().mockImplementation(() => [
+          {
+            crop: { name: 'Tomato_KE', qualifierName: 'Tomato' },
+          },
+        ]),
+      }));
+
+      let scoresRef = {
+        get: snapshot,
+        then: snapshot,
+      };
+
+      let updateDocument = jest.fn();
+      let linkDocument = jest.fn().mockImplementation(() => ({
+        set: updateDocument,
+      }));
+
+      let linksRef = {
+        doc: linkDocument,
+      };
+      let cropName = 'Tomato',
+        cmsDocId = '1',
+        cmsLocale = 'en-US',
+        cmsEnvironment = 'production';
+
+      await repository.createLinkIfScoreExists(
+        scoresRef,
+        linksRef,
+        cropName,
+        cmsDocId,
+        cmsLocale,
+        cmsEnvironment
+      );
+      expect(snapshot).toBeCalled();
+      expect(linkDocument).toBeCalled();
+      expect(updateDocument).toBeCalled();
+      done();
+    });
   });
 
   describe('Deleting Orphaned Crop Scores', () => {
