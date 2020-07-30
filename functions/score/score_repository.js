@@ -18,15 +18,15 @@ exports.createLinkIfScoreExists = async function(
   console.log('Executing createLinkIfScoreExists');
   if (JSON.stringify(scores) !== '{}') {
     console.log(`Creating crop link: ${cropName} to ${cmsDocId} in ${linksRef.path} `);
-    await linksRef
-      .doc(cmsDocId)
-      .set({
-        cropName: cropName,
-        cmsCropId: cmsDocId,
-        locale: cmsLocale,
-        env: cmsEnvironment,
-        scores,
-      });
+    await linksRef.doc(cmsDocId).set({
+      cropName: cropName,
+      cmsCropId: cmsDocId,
+      locale: cmsLocale,
+      env: cmsEnvironment,
+      scores,
+    });
+  } else {
+    console.log(`No scores derived for crop : ${cropName} `);
   }
 };
 
@@ -82,11 +82,16 @@ async function buildCMSLinkCropScores(scoresRef, cropName) {
   let docsSnapShot = await scoresRef.get().then(collection => {
     return collection.docs.map(doc => doc.data());
   });
+  console.log(`Building scores for crop link: ${cropName}`);
   let scoresObject = {};
   for (let doc of docsSnapShot) {
     if (doc.crop.qualifierName === cropName) {
       scoresObject[doc.crop.region] = doc.crop.name;
     }
+  }
+  let score = JSON.stringify(scoresObject);
+  if (score !== '{}') {
+    console.log(`Scores built for crop : ${cropName} and score is : ${score} `);
   }
   return scoresObject;
 }
