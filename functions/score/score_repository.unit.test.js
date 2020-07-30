@@ -79,7 +79,7 @@ describe('Score repository', () => {
         })),
         then: jest.fn().mockImplementation(() => [
           {
-            crop: { name: 'Tomato_KE', qualifierName: 'Tomato' },
+            crop: { name: 'Tomato_KE', qualifierName: 'Tomato', region: 'KE' },
           },
         ]),
       }));
