@@ -84,7 +84,7 @@ async function buildCMSLinkCropScores(scoresRef, cropName, cropScoreLookUpName) 
     return collection.docs.map(doc => doc.data());
   });
   console.log(`Creating score link for crop : ${cropScoreLookUpName}`);
-  let score;
+  let score = '';
   for (let doc of docsSnapShot) {
     if (doc.crop.name === cropScoreLookUpName) {
       score = doc.crop.name;

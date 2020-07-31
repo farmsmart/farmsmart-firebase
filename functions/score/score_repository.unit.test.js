@@ -54,6 +54,7 @@ describe('Score repository', () => {
 
       let linksRef = {};
       let cropName = 'NAME',
+        cropScoreLookUpName = 'Tomato_US',
         cmsDocId = '1',
         cmsLocale = 'en-US',
         cmsEnvironment = 'production';
@@ -62,6 +63,7 @@ describe('Score repository', () => {
         scoresRef,
         linksRef,
         cropName,
+        cropScoreLookUpName,
         cmsDocId,
         cmsLocale,
         cmsEnvironment
@@ -98,6 +100,7 @@ describe('Score repository', () => {
         doc: linkDocument,
       };
       let cropName = 'Tomato',
+        cropScoreLookUpName = 'Tomato_KE',
         cmsDocId = '1',
         cmsLocale = 'en-US',
         cmsEnvironment = 'production';
@@ -106,6 +109,7 @@ describe('Score repository', () => {
         scoresRef,
         linksRef,
         cropName,
+        cropScoreLookUpName,
         cmsDocId,
         cmsLocale,
         cmsEnvironment
