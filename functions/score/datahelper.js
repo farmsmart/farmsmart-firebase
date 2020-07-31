@@ -42,6 +42,7 @@ exports.getCmsCropChange = function(current, previous) {
   let cropChange = {
     isChange: false,
     docId: null,
+    recommendationEngineCropName: null,
     cropDocId: null,
     isDelete: false,
     isInsert: false,
@@ -73,6 +74,7 @@ exports.getCmsCropChange = function(current, previous) {
   cropChange.cropDocId = doc[flMetaProperty].fl_id;
   cropChange.doc = doc;
   cropChange.isPublished = doc.status === 'PUBLISHED';
+  cropChange.recommendationEngineCropName = doc.recommendationEngineCropName;
 
   if (!cropChange.isInsert && !cropChange.isDelete) {
     // Detect changes in the name of main document or

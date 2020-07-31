@@ -42,6 +42,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       });
   } else if (scoreChange.isInsert) {
     let cropName = scoreChange.doc.crop.qualifierName;
+    let cropScoreLookUpName = scoreChange.doc.crop.name;
     const main = await db
       .collection('fl_content')
       .where('_fl_meta_.locale', '==', 'en-US')
@@ -68,6 +69,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
           cropScoresRef,
           cropScoreCmsLinkRef,
           cropName,
+          cropScoreLookUpName,
           cmsCrop.id,
           locale,
           environment
