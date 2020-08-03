@@ -56,13 +56,10 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         apiKey
       );
 
-      requestISO = transform_score.territoryLocale(sheetData);
-      for (let region of functions.config().farmsmart.scorematrix.docId.regions.region) {
-        if (region.countryISO === requestISO) {
-          matrixDocId = region.key;
-          break;
-        }
-      }
+      //add new functions:config:set in config.yml when new region is added
+      //runtimeconfig.json will have keys per region
+      requestISO = transform_score.territoryLocale(sheetData).toLowerCase();
+      matrixDocId = functions.config().farmsmart.scorematrix[requestISO].id;
       // validate if sheetId matches with configured sheetId for a given region.
       if (sheetId !== matrixDocId) {
         throw Error('Invalid spreadsheet for a given region.');
