@@ -53,10 +53,15 @@ async function handleAttachCmsCropToCropScore(change, context) {
     let main = await cmsRef.doc(cmsCropChange.cropDocId).get();
     if (main.exists) {
       let locale = cmsCropChange.doc._fl_meta_.locale;
-      let recommendationEngineCropName = main.data().recommendationEngineCropName;
+      let recommendationEngineCropName = main.recommendationEngineCropName;
       let cropScoreLookUpName =
         recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
-      console.log('Creating link when crop change is not a main doc  :' + cmsCropChange.docId);
+      console.log(
+        'Creating link when crop change is not a main doc:' +
+          cmsCropChange.docId +
+          ' and lookup name : ' +
+          cropScoreLookUpName
+      );
       await score_repository.createLinkIfScoreExists(
         scoresRef,
         linksRef,

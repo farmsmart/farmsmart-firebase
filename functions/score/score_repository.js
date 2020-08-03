@@ -93,6 +93,8 @@ async function buildCMSLinkCropScores(scoresRef, cropName, cropScoreLookUpName) 
   }
   if (score !== '') {
     console.log(`CMS link crop score for crop: ${cropName} is ${score} `);
+  } else {
+    console.log(`No score found for crop: ${cropName}`);
   }
   return score;
 }

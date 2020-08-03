@@ -107,9 +107,7 @@ describe('fs_crop_scores On Write', () => {
 
     let cmsRefMock = jest.fn().mockReturnValueOnce({
       where: jest.fn().mockReturnValue({
-        where: jest.fn().mockReturnValue({
-          where: queryMock,
-        }),
+        where: queryMock,
       }),
     });
     let linksRefMock = jest.fn().mockImplementation(() => {});
@@ -131,7 +129,7 @@ describe('fs_crop_scores On Write', () => {
     expect(fs).toBeCalled();
     expect(collectionMock).toHaveBeenCalledTimes(1);
     expect(cmsRefMock).toHaveBeenCalledTimes(1);
-    expect(queryMock).toHaveBeenCalledWith('name', '==', 'Tomato');
+    expect(queryMock).toHaveBeenCalledWith('recommendationEngineCropName', '==', 'Tomato');
     done();
   });
   it('should handle scores and link to cms', async done => {
@@ -168,9 +166,7 @@ describe('fs_crop_scores On Write', () => {
 
     let fetchSwahili = jest.fn().mockImplementation(() => ({
       where: jest.fn().mockImplementation(() => ({
-        where: jest.fn().mockImplementation(() => ({
-          where: queryMock,
-        })),
+        where: queryMock,
       })),
     }));
 

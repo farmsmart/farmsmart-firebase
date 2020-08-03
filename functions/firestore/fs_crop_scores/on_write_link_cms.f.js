@@ -42,14 +42,12 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
         return Promise.resolve(true);
       });
   } else if (scoreChange.isInsert) {
-    let cropName = scoreChange.doc.crop.qualifierName;
-    let cropScoreLookUpName = scoreChange.doc.crop.name;
-    console.log('Executing score change insert for crop :' + cropScoreLookUpName);
+    let cropQualifierName = scoreChange.doc.crop.qualifierName;
+    console.log('Executing score change insert for crop :' + cropQualifierName);
     const main = await db
       .collection('fl_content')
-      .where('_fl_meta_.locale', '==', 'en-US')
       .where('_fl_meta_.schema', '==', 'crop')
-      .where('name', '==', cropName)
+      .where('recommendationEngineCropName', '==', cropQualifierName)
       .get();
 
     //In reality there should only be one cms document found.
@@ -62,11 +60,15 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       // when multi language is enabled, then a main document can have more than 1 cms crops
       multiCmsCrops.forEach(async cmsCrop => {
         let cropData = cmsCrop.data();
+        let cropName = cropData.recommendationEngineCropName;
         let locale = cropData._fl_meta_.locale;
         let environment = cropData._fl_meta_.env;
         const cropScoresRef = db.collection('fs_crop_scores');
         const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-
+        let cropScoreLookUpName = cropName.trim() + '_' + locale.split('-')[1].trim();
+        console.log(
+          'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
+        );
         await score_repository.createLinkIfScoreExists(
           cropScoresRef,
           cropScoreCmsLinkRef,
