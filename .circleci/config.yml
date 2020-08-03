@@ -209,7 +209,7 @@ jobs:
             source ./env.sh
             set -euo pipefail
 
-            curl --silent "https://us-central1-${FIREBASE_PROJECT}.cloudfunctions.net/httpsOnRequestBulkUploadScoreMatrix?sheetId=${SCORE_DOC_ID}" | grep -v FAILED
+            curl --silent "https://us-central1-${FIREBASE_PROJECT}.cloudfunctions.net/httpsOnRequestBulkUploadScoreMatrix?sheetId=${SCORE_DOC_ID_KE}" | grep -v FAILED
 
 workflows:
   backend:

@@ -30,6 +30,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
 
   // new attribute qualifierName representing crop name - scoreChange.doc.crop.qualifierName
   if (scoreChange.isDelete) {
+    console.log('Executing score change delete for crop :' + scoreChange.doc.crop.name);
     await db
       .collection('fs_crop_score_cms_link')
       .where('cropName', '==', scoreChange.doc.crop.qualifierName)
@@ -43,6 +44,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
   } else if (scoreChange.isInsert) {
     let cropName = scoreChange.doc.crop.qualifierName;
     let cropScoreLookUpName = scoreChange.doc.crop.name;
+    console.log('Executing score change insert for crop :' + cropScoreLookUpName);
     const main = await db
       .collection('fl_content')
       .where('_fl_meta_.locale', '==', 'en-US')

@@ -38,6 +38,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
     let recommendationEngineCropName = cmsCropChange.doc.recommendationEngineCropName;
     let cropScoreLookUpName =
       recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
+    console.log('Creating link when crop change is a main doc  :' + cmsCropChange.docId);
     await score_repository.createLinkIfScoreExists(
       scoresRef,
       linksRef,
@@ -55,6 +56,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
       let recommendationEngineCropName = main.data().recommendationEngineCropName;
       let cropScoreLookUpName =
         recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
+      console.log('Creating link when crop change is not a main doc  :' + cmsCropChange.docId);
       await score_repository.createLinkIfScoreExists(
         scoresRef,
         linksRef,
