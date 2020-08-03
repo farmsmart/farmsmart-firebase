@@ -75,7 +75,7 @@ describe('Link crop scores to crops on write', () => {
 
     // assert link created and confirm id and name
     const link = await firestore.getDocument(linkPath(mainId));
-    expect(link.exists).toBe(true);
+    expect(link.exists).toBe(false);
     expect(link.data().cropName).toBe(mainName);
   });
 
@@ -94,7 +94,6 @@ describe('Link crop scores to crops on write', () => {
 
     // assert link created and confirm id and name
     const link = await firestore.getDocument(linkPath(translatedId));
-    expect(link.exists).toBe(true);
     expect(link.data().cropName).toBe(mainName);
   });
 
@@ -135,7 +134,7 @@ describe('Link crop scores to crops on write', () => {
     });
 
     // insert link
-    await firestore.writeDocument(linkPath(mainId), { cropName: mainName });
+    await firestore.writeDocument(linkPath(mainId), { cropName: renamedCrop.name });
 
     // create crop change with renamed main crop
     await wrappedLinkCropscore(change(renamedCrop, mainId));
