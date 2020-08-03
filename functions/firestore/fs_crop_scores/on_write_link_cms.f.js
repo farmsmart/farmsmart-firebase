@@ -50,7 +50,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       .where('name', '==', cropName)
       .get();
 
-    //In reality there should only be one cms document found
+    //In reality there should only be one cms document found.
     main.forEach(async mainDoc => {
       const multiCmsCrops = await db
         .collection('fl_content')
