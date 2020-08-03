@@ -26,8 +26,11 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
 
     // Simple check to ensure that sheetId is the same as the configured sheet
     const sheetId = request.query.sheetId;
-    if (!request.query.sheetId || sheetId != functions.config().farmsmart.scorematrix.doc.id) {
-      throw Error('Missing or Invalid spreadsheet');
+    console.log('sheet id is :' + sheetId);
+    // eslint-disable-next-line eqeqeq
+    let matrixDocId;
+    if (!request.query.sheetId) {
+      throw Error('Missing spreadsheet');
     }
 
     const apiauth = await sheets_helper.authenticateServiceAccount();
@@ -44,6 +47,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
     await score_repository.updateSpreadsheet(db, infoRef, spreadsheet);
 
     let crops = [];
+    let requestISO;
     if (spreadsheet.scoreMatrix) {
       const sheetData = await sheets_helper.fetchSheetValues(
         spreadsheet.scoreMatrix,
@@ -51,6 +55,15 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         sheetId,
         apiKey
       );
+
+      //add new functions:config:set in config.yml when new region is added
+      //runtimeconfig.json will have keys per region
+      requestISO = transform_score.territoryLocale(sheetData).toLowerCase();
+      matrixDocId = functions.config().farmsmart.scorematrix[requestISO].id;
+      // validate if sheetId matches with configured sheetId for a given region.
+      if (sheetId !== matrixDocId) {
+        throw Error('Invalid spreadsheet for a given region.');
+      }
       const cropsData = transform_score.transformCropScores(sheetData);
       console.log(`Processing ${cropsData.length} crop scores`);
 
@@ -59,6 +72,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
           score_repository.writeScoreToFireStore(crop, sheetId, db, SCORES_COLLECTION)
         )
       );
+
       console.log(`Uploaded crop scores: ${crops}`);
 
       // Delete any crop record that is not in the spreadsheet.
@@ -72,7 +86,7 @@ async function handleBulkUploadScoreBySpreadsheet(request, response) {
         sheetId,
         apiKey
       );
-      const factors = transform_reference.transformFactors(sheetData);
+      const factors = transform_reference.transformFactors(sheetData, requestISO);
       console.log(`Processing factors reference`);
 
       await score_repository.writeScoreToFireStore(factors, sheetId, db, REF_COLLECTION);

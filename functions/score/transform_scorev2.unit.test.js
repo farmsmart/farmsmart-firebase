@@ -32,12 +32,12 @@ describe('Transform Score Matrix', () => {
   });
 });
 
-function validateCrop(data, name) {
+function validateCrop(data, qualifierName) {
   expected(data).to.have.property('crop');
   let crop = data.crop;
   expected(crop)
-    .to.have.property('name')
-    .equals(name);
+    .to.have.property('qualifierName')
+    .equals(qualifierName);
   expected(crop).to.have.property('dataHash');
 
   expected(data)

@@ -36,17 +36,25 @@ describe('Score repository', () => {
 
   describe('Create Links for Scores', () => {
     test('should not create if score does not exist', async done => {
-      let document = jest.fn().mockImplementation(() => ({
+      const snapshot = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
-          exists: false,
+          docs: [{ id: 'Apple' }],
         })),
+        then: jest.fn().mockImplementation(() => [
+          {
+            crop: { name: 'Tomato_KE', qualifierName: 'Tomato' },
+          },
+        ]),
       }));
 
       let scoresRef = {
-        doc: document,
+        get: snapshot,
+        then: snapshot,
       };
+
       let linksRef = {};
       let cropName = 'NAME',
+        cropScoreLookUpName = 'Tomato_US',
         cmsDocId = '1',
         cmsLocale = 'en-US',
         cmsEnvironment = 'production';
@@ -55,25 +63,32 @@ describe('Score repository', () => {
         scoresRef,
         linksRef,
         cropName,
+        cropScoreLookUpName,
         cmsDocId,
         cmsLocale,
         cmsEnvironment
       );
 
-      expect(document).toBeCalled();
+      expect(snapshot).toBeCalled();
 
       done();
     });
 
     test('should create if a score exist', async done => {
-      let document = jest.fn().mockImplementation(() => ({
+      const snapshot = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
-          exists: true,
+          docs: [{ id: 'Apple' }],
         })),
+        then: jest.fn().mockImplementation(() => [
+          {
+            crop: { name: 'Tomato_KE', qualifierName: 'Tomato', region: 'KE' },
+          },
+        ]),
       }));
 
       let scoresRef = {
-        doc: document,
+        get: snapshot,
+        then: snapshot,
       };
 
       let updateDocument = jest.fn();
@@ -84,7 +99,8 @@ describe('Score repository', () => {
       let linksRef = {
         doc: linkDocument,
       };
-      let cropName = 'NAME',
+      let cropName = 'Tomato',
+        cropScoreLookUpName = 'Tomato_KE',
         cmsDocId = '1',
         cmsLocale = 'en-US',
         cmsEnvironment = 'production';
@@ -93,12 +109,12 @@ describe('Score repository', () => {
         scoresRef,
         linksRef,
         cropName,
+        cropScoreLookUpName,
         cmsDocId,
         cmsLocale,
         cmsEnvironment
       );
-
-      expect(document).toBeCalled();
+      expect(snapshot).toBeCalled();
       expect(linkDocument).toBeCalled();
       expect(updateDocument).toBeCalled();
       done();
@@ -209,6 +225,7 @@ describe('Score repository', () => {
         // when
         await repository.writeScoreToFireStore(scoreData, sheetId, db, collection);
         fail('Expecting an error to be thrown');
+        // eslint-disable-next-line no-empty
       } catch (err) {}
 
       expect(db.runTransaction).toHaveBeenCalledTimes(0);

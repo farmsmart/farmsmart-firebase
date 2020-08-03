@@ -19,7 +19,6 @@ async function handleAttachCmsCropToCropScore(change, context) {
   const previous = change.before.data();
 
   const cmsCropChange = datahelper.getCmsCropChange(current, previous);
-
   if (!cmsCropChange || !cmsCropChange.isChange) {
     return null;
   }
@@ -35,29 +34,37 @@ async function handleAttachCmsCropToCropScore(change, context) {
     // Delete when a cms crop is deleted or unpublished
     await score_repository.deleteLink(linksRef, cmsCropChange.docId);
   } else if (cmsCropChange.isMainDocument && cmsCropChange.isPublished) {
+    let locale = cmsCropChange.doc._fl_meta_.locale;
+    let recommendationEngineCropName = cmsCropChange.doc.recommendationEngineCropName;
+    let cropScoreLookUpName =
+      recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
     await score_repository.createLinkIfScoreExists(
       scoresRef,
       linksRef,
-      cmsCropChange.doc.name,
+      recommendationEngineCropName,
+      cropScoreLookUpName,
       cmsCropChange.docId,
-      cmsCropChange.doc._fl_meta_.locale,
+      locale,
       cmsCropChange.doc._fl_meta_.env
     );
   } else if (!cmsCropChange.isMainDocument && cmsCropChange.isPublished) {
     // find the main document of this cmsCrop to fetch the crop name used for association
     let main = await cmsRef.doc(cmsCropChange.cropDocId).get();
     if (main.exists) {
-      let crop = main.data().name;
+      let locale = cmsCropChange.doc._fl_meta_.locale;
+      let recommendationEngineCropName = main.data().recommendationEngineCropName;
+      let cropScoreLookUpName =
+        recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
       await score_repository.createLinkIfScoreExists(
         scoresRef,
         linksRef,
-        crop,
+        recommendationEngineCropName,
+        cropScoreLookUpName,
         cmsCropChange.docId,
-        cmsCropChange.doc._fl_meta_.locale,
+        locale,
         cmsCropChange.doc._fl_meta_.env
       );
     }
   }
-
   return null;
 }

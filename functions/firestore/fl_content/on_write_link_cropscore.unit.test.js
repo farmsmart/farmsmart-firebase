@@ -18,6 +18,7 @@ describe('fl_content On Write link crop score', () => {
       env: 'production',
     },
     name: 'SAMPLE-CROP',
+    recommendationEngineCropName: 'SAMPLE-CROP',
   };
 
   let cmsChange;
@@ -87,6 +88,7 @@ describe('fl_content On Write link crop score', () => {
     cmsChange.mockReturnValue({
       isChange: true,
       isDelete: true,
+      doc: sampleCms,
     });
 
     await wrapped(flContentChange);
@@ -102,6 +104,7 @@ describe('fl_content On Write link crop score', () => {
     cmsChange.mockReturnValue({
       isChange: true,
       isPublished: false,
+      doc: sampleCms,
     });
 
     await wrapped(flContentChange);
@@ -136,6 +139,7 @@ describe('fl_content On Write link crop score', () => {
       expect.anything(),
       expect.anything(),
       'SAMPLE-CROP',
+      'SAMPLE-CROP_US',
       'DOCID',
       'en-US',
       'production'
@@ -191,6 +195,7 @@ describe('fl_content On Write link crop score', () => {
           exists: true,
           data: jest.fn().mockReturnValue({
             name: 'CROP',
+            recommendationEngineCropName: 'CROP',
           }),
         }),
       })),
@@ -212,6 +217,7 @@ describe('fl_content On Write link crop score', () => {
       expect.anything(),
       expect.anything(),
       'CROP',
+      'CROP_US',
       'DOCID',
       'en-US',
       'production'

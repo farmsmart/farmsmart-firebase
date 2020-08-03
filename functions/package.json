@@ -44,7 +44,7 @@
     "eslint-plugin-jest": "^22.6.4",
     "eslint-plugin-promise": "^4.1.1",
     "firebase-functions-test": "^0.1.6",
-    "firebase-tools": "^6.10.0",
+    "firebase-tools": "^8.6.0",
     "jest": "^24.8.0",
     "jest-dot-reporter": "^1.0.8",
     "jest-junit": "^6.4.0",

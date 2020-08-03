@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const crop_constants = {
   PROP_CROP: 'crop',
   PROP_CROP_TITLE: 'name',
+  PROP_CROP_REGION: 'region',
+  PROP_CROP_QUALIFIER_NAME: 'qualifierName',
   PROP_HASH: 'dataHash',
   PROP_SCORES: 'scores',
   PROP_VALID: 'valid',
@@ -21,11 +23,17 @@ exports.CropScoreBuilder = function() {
   this.factors = new Map();
   this.isValid = true;
 
-  this.setCrop = function(cropName = null) {
+  this.setCrop = function(cropName = null, cropRegion = null, qualifierName) {
     let crop = createObjectIfNotPresent(this.data, crop_constants.PROP_CROP);
 
     if (cropName) {
       crop[crop_constants.PROP_CROP_TITLE] = cropName;
+    }
+    if (cropRegion) {
+      crop[crop_constants.PROP_CROP_REGION] = cropRegion;
+    }
+    if (qualifierName) {
+      crop[crop_constants.PROP_CROP_QUALIFIER_NAME] = qualifierName;
     }
   };
 

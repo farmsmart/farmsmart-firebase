@@ -28,10 +28,11 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
 
   const db = admin.firestore();
 
+  // new attribute qualifierName representing crop name - scoreChange.doc.crop.qualifierName
   if (scoreChange.isDelete) {
     await db
       .collection('fs_crop_score_cms_link')
-      .where('cropName', '==', scoreChange.doc.crop.name)
+      .where('cropName', '==', scoreChange.doc.crop.qualifierName)
       .get()
       .then(link => {
         link.forEach(async snapshot => {
@@ -40,14 +41,16 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
         return Promise.resolve(true);
       });
   } else if (scoreChange.isInsert) {
-    let cropName = scoreChange.doc.crop.name;
+    let cropName = scoreChange.doc.crop.qualifierName;
+    let cropScoreLookUpName = scoreChange.doc.crop.name;
     const main = await db
       .collection('fl_content')
       .where('_fl_meta_.locale', '==', 'en-US')
       .where('_fl_meta_.schema', '==', 'crop')
       .where('name', '==', cropName)
       .get();
-    // In reality there should only be one cms document found
+
+    //In reality there should only be one cms document found.
     main.forEach(async mainDoc => {
       const multiCmsCrops = await db
         .collection('fl_content')
@@ -61,10 +64,12 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
         let environment = cropData._fl_meta_.env;
         const cropScoresRef = db.collection('fs_crop_scores');
         const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
+
         await score_repository.createLinkIfScoreExists(
           cropScoresRef,
           cropScoreCmsLinkRef,
           cropName,
+          cropScoreLookUpName,
           cmsCrop.id,
           locale,
           environment

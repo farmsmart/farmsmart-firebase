@@ -56,7 +56,8 @@ describe('fs_crop_scores On Write', () => {
       isDelete: true,
       doc: {
         crop: {
-          name: 'Tomato',
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
         },
       },
     });
@@ -94,7 +95,8 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          name: 'Tomato',
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
         },
       },
     });
@@ -138,7 +140,8 @@ describe('fs_crop_scores On Write', () => {
       isInsert: true,
       doc: {
         crop: {
-          name: 'Tomato',
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
         },
       },
     });
