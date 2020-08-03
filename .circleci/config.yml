@@ -111,6 +111,8 @@ jobs:
             echo "export FIREBASE_PROJECT=${FIREBASE_PROJECT}" >> ./env.sh
             echo "export SHEETS_API_KEY=${SHEETS_API_KEY}" >> ./env.sh
             echo "export SCORE_DOC_ID=${SCORE_DOC_ID}" >> ./env.sh
+            echo "export SCORE_DOC_ID_KE=${SCORE_DOC_ID_KE}" >> ./env.sh
+            echo "export SCORE_DOC_ID_PF=${SCORE_DOC_ID_PF}" >> ./env.sh
             echo "export SLACK_FARMSMART_TOKEN=${SLACK_FARMSMART_TOKEN}" >> ./env.sh
             echo "export BULKUPLOAD_URL=${BULKUPLOAD_URL}" >> ./env.sh
 
