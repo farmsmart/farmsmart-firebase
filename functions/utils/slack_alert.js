@@ -3,8 +3,6 @@ const functions = require('firebase-functions');
 
 const channel = '#farmsmart-alerts';
 
-functions.config().farmsmart.slack = 'X0000X';
-
 function post(message) {
   const token = functions.config().farmsmart.slack.api.token;
   const web = new WebClient(token);
