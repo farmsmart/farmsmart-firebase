@@ -53,7 +53,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
     let main = await cmsRef.doc(cmsCropChange.cropDocId).get();
     if (main.exists) {
       let locale = cmsCropChange.doc._fl_meta_.locale;
-      let recommendationEngineCropName = main.recommendationEngineCropName;
+      let recommendationEngineCropName = main.data().recommendationEngineCropName;
       let cropScoreLookUpName =
         recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
       console.log(
