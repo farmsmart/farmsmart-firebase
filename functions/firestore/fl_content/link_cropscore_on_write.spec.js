@@ -42,6 +42,7 @@ describe('Link crop scores to crops on write', () => {
   const mainCrop = {
     ...sampleCrop,
     name: mainName,
+    recommendationEngineCropName: mainName,
     _fl_meta_: { ...sampleCrop._fl_meta_, docId: mainId, fl_id: mainId },
   };
 
@@ -50,6 +51,7 @@ describe('Link crop scores to crops on write', () => {
   const translatedCrop = {
     ...sampleCrop,
     name: translatedName,
+    recommendationEngineCropName: translatedName,
     _fl_meta_: { ...sampleCrop._fl_meta_, docId: translatedId, fl_id: mainId },
   };
 
@@ -64,7 +66,9 @@ describe('Link crop scores to crops on write', () => {
 
   it('should create a link if the main (en-us) crop is published', async () => {
     // insert score data
-    await firestore.writeDocument(scorePath(mainName), { crop: { name: mainName } });
+    await firestore.writeDocument(scorePath(mainName), {
+      crop: { name: mainName, recommendationEngineCropName: translatedName },
+    });
 
     // create crop change with published main crop
     await wrappedLinkCropscore(change(mainCrop, mainId));
@@ -119,7 +123,11 @@ describe('Link crop scores to crops on write', () => {
     // insert main crop
     await firestore.writeDocument(cropPath(mainId), mainCrop);
 
-    const renamedCrop = { ...mainCrop, name: 'RenamedCrop' };
+    const renamedCrop = {
+      ...mainCrop,
+      name: 'RenamedCrop',
+      recommendationEngineCropName: 'RenamedCrop',
+    };
 
     // insert score data
     await firestore.writeDocument(scorePath(renamedCrop.name), {
