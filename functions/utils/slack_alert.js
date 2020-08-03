@@ -3,15 +3,10 @@ const functions = require('firebase-functions');
 
 const channel = '#farmsmart-alerts';
 
+functions.config().farmsmart.slack = 'X0000X';
+
 function post(message) {
-  let token;
-  if (functions.config().farmsmart.slack === undefined) {
-    token = '00XYZ00';
-    console.log('Using dummy token,not picked from runtime config :' + token);
-  } else {
-    token = functions.config().farmsmart.slack.api.token;
-    console.log('Using token from runtime config :' + token);
-  }
+  const token = functions.config().farmsmart.slack.api.token;
   const web = new WebClient(token);
 
   return web.chat.postMessage({ channel: channel, text: message }).catch(error => {
