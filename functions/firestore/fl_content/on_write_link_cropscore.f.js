@@ -20,6 +20,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
 
   const cmsCropChange = datahelper.getCmsCropChange(current, previous);
   if (!cmsCropChange || !cmsCropChange.isChange) {
+    console.log(`No Changes detected .`);
     return null;
   }
 
@@ -32,13 +33,15 @@ async function handleAttachCmsCropToCropScore(change, context) {
 
   if (cmsCropChange.isDelete || !cmsCropChange.isPublished) {
     // Delete when a cms crop is deleted or unpublished
+    console.log(`Executing delete link .`);
     await score_repository.deleteLink(linksRef, cmsCropChange.docId);
   } else if (cmsCropChange.isMainDocument && cmsCropChange.isPublished) {
+    console.log('Creating link when crop change is a main doc  :' + cmsCropChange.docId);
     let locale = cmsCropChange.doc._fl_meta_.locale;
     let recommendationEngineCropName = cmsCropChange.doc.recommendationEngineCropName;
     let cropScoreLookUpName =
       recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
-    console.log('Creating link when crop change is a main doc  :' + cmsCropChange.docId);
+    console.log('recommendationEngineCropName is  :' + recommendationEngineCropName);
     await score_repository.createLinkIfScoreExists(
       scoresRef,
       linksRef,
@@ -49,6 +52,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
       cmsCropChange.doc._fl_meta_.env
     );
   } else if (!cmsCropChange.isMainDocument && cmsCropChange.isPublished) {
+    console.log('Creating link when crop change is a not a main doc  :' + cmsCropChange.docId);
     // find the main document of this cmsCrop to fetch the crop name used for association
     let main = await cmsRef.doc(cmsCropChange.cropDocId).get();
     if (main.exists) {
@@ -57,10 +61,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
       let cropScoreLookUpName =
         recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
       console.log(
-        'Creating link when crop change is not a main doc:' +
-          cmsCropChange.docId +
-          ' and lookup name : ' +
-          cropScoreLookUpName
+        'Action for  doc:' + cmsCropChange.docId + ' and lookup name : ' + cropScoreLookUpName
       );
       await score_repository.createLinkIfScoreExists(
         scoresRef,

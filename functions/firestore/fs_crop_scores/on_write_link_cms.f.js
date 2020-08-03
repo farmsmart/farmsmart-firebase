@@ -50,6 +50,10 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       .where('recommendationEngineCropName', '==', cropQualifierName)
       .get();
 
+    if (!main) {
+      console.log('No crop schema doc found for crop ' + cropQualifierName);
+    }
+
     //In reality there should only be one cms document found.
     main.forEach(async mainDoc => {
       const multiCmsCrops = await db
