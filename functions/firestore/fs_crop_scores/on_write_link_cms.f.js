@@ -55,6 +55,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
     }
 
     //In reality there should only be one cms document found.
+    console.log('Beginning to create link.');
     main.forEach(async mainDoc => {
       const multiCmsCrops = await db
         .collection('fl_content')
@@ -69,7 +70,13 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
         let environment = cropData._fl_meta_.env;
         const cropScoresRef = db.collection('fs_crop_scores');
         const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-        let cropScoreLookUpName = cropName.trim() + '_' + locale.split('-')[1].trim();
+        let cropScoreLookUpName =
+          cropName.trim() +
+          '_' +
+          locale
+            .split('-')[1]
+            .toUpperCase()
+            .trim();
         console.log(
           'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
         );

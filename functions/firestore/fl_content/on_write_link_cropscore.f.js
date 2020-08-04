@@ -40,7 +40,12 @@ async function handleAttachCmsCropToCropScore(change, context) {
     let locale = cmsCropChange.doc._fl_meta_.locale;
     let recommendationEngineCropName = cmsCropChange.doc.recommendationEngineCropName;
     let cropScoreLookUpName =
-      recommendationEngineCropName.trim() + '_' + locale.split('-')[1].trim();
+      recommendationEngineCropName.trim() +
+      '_' +
+      locale
+        .split('-')[1]
+        .toUpperCase()
+        .trim();
     console.log('recommendationEngineCropName is  :' + recommendationEngineCropName);
     await score_repository.createLinkIfScoreExists(
       scoresRef,
