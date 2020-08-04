@@ -53,15 +53,11 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
 
     if (!main) {
       console.log('No crop schema doc found for crop ' + cropQualifierName);
-    } else {
-      console.log('Keys for main : ' + Object.keys(main));
     }
-
     //In reality there should only be one cms document found.
     console.log('Beginning to create link for crop :' + cropQualifierName);
     main.forEach(async cmsCrop => {
       let cropData = cmsCrop.data();
-      console.log('recEngineCropName is :' + cropData.recommendationEngineCropName);
       let cropName = cropData.recommendationEngineCropName;
       let locale = cropData._fl_meta_.locale;
       let environment = cropData._fl_meta_.env;
