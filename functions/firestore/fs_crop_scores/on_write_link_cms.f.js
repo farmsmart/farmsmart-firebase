@@ -66,33 +66,36 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       if (!multiCmsCrops) {
         console.log('multiCmsCrops are empty.');
       } else {
-        console.log('Objects keys are :' + Object.keys(multiCmsCrops));
+        for (let [key, value] of Object.entries(multiCmsCrops)) {
+          console.log('printing key values');
+          console.log(key, value);
+        }
       }
-      multiCmsCrops.forEach(async cmsCrop => {
+      multiCmsCrops._docs().forEach(async cmsCrop => {
         let cropData = cmsCrop.data();
         console.log('recEngineCropName is :' + cropData);
-        // let cropName = cropData.recommendationEngineCropName;
-        // let locale = cropData._fl_meta_.locale;
-        // let environment = cropData._fl_meta_.env;
-        // const cropScoresRef = db.collection('fs_crop_scores');
-        // const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-        // let territory = locale
-        //   .split('-')[1]
-        //   .toUpperCase()
-        //   .trim();
-        // let cropScoreLookUpName = cropName.trim() + '_' + territory;
-        // console.log(
-        //   'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
-        // );
-        // await score_repository.createLinkIfScoreExists(
-        //   cropScoresRef,
-        //   cropScoreCmsLinkRef,
-        //   cropName,
-        //   cropScoreLookUpName,
-        //   cmsCrop.id,
-        //   locale,
-        //   environment
-        // );
+        let cropName = cropData.recommendationEngineCropName;
+        let locale = cropData._fl_meta_.locale;
+        let environment = cropData._fl_meta_.env;
+        const cropScoresRef = db.collection('fs_crop_scores');
+        const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
+        let territory = locale
+          .split('-')[1]
+          .toUpperCase()
+          .trim();
+        let cropScoreLookUpName = cropName.trim() + '_' + territory;
+        console.log(
+          'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
+        );
+        await score_repository.createLinkIfScoreExists(
+          cropScoresRef,
+          cropScoreCmsLinkRef,
+          cropName,
+          cropScoreLookUpName,
+          cmsCrop.id,
+          locale,
+          environment
+        );
       });
     });
   }
