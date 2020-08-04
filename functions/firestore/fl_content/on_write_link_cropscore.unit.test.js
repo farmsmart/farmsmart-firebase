@@ -216,8 +216,8 @@ describe('fl_content On Write link crop score', () => {
     expect(createLinkIfScoreExists).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
-      'CROP',
-      'CROP_US',
+      'SAMPLE-CROP',
+      'SAMPLE-CROP_US',
       'DOCID',
       'en-US',
       'production'
