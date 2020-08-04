@@ -70,29 +70,29 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       }
       multiCmsCrops.forEach(async cmsCrop => {
         let cropData = cmsCrop.data();
-        console.log('recEngineCropName is :' + cropData.recommendationEngineCropName);
-        let cropName = cropData.recommendationEngineCropName;
-        let locale = cropData._fl_meta_.locale;
-        let environment = cropData._fl_meta_.env;
-        const cropScoresRef = db.collection('fs_crop_scores');
-        const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-        let territory = locale
-          .split('-')[1]
-          .toUpperCase()
-          .trim();
-        let cropScoreLookUpName = cropName.trim() + '_' + territory;
-        console.log(
-          'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
-        );
-        await score_repository.createLinkIfScoreExists(
-          cropScoresRef,
-          cropScoreCmsLinkRef,
-          cropName,
-          cropScoreLookUpName,
-          cmsCrop.id,
-          locale,
-          environment
-        );
+        console.log('recEngineCropName is :' + cropData);
+        // let cropName = cropData.recommendationEngineCropName;
+        // let locale = cropData._fl_meta_.locale;
+        // let environment = cropData._fl_meta_.env;
+        // const cropScoresRef = db.collection('fs_crop_scores');
+        // const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
+        // let territory = locale
+        //   .split('-')[1]
+        //   .toUpperCase()
+        //   .trim();
+        // let cropScoreLookUpName = cropName.trim() + '_' + territory;
+        // console.log(
+        //   'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
+        // );
+        // await score_repository.createLinkIfScoreExists(
+        //   cropScoresRef,
+        //   cropScoreCmsLinkRef,
+        //   cropName,
+        //   cropScoreLookUpName,
+        //   cmsCrop.id,
+        //   locale,
+        //   environment
+        // );
       });
     });
   }
