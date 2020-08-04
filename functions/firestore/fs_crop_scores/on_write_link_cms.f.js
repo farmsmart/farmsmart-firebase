@@ -48,55 +48,42 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       .collection('fl_content')
       .where('_fl_meta_.schema', '==', 'crop')
       .where('recommendationEngineCropName', '==', cropQualifierName)
+      .where('status', '==', 'PUBLISHED')
       .get();
 
     if (!main) {
       console.log('No crop schema doc found for crop ' + cropQualifierName);
+    } else {
+      console.log('Keys for main : ' + Object.keys(main));
     }
 
     //In reality there should only be one cms document found.
     console.log('Beginning to create link for crop :' + cropQualifierName);
-    main.forEach(async mainDoc => {
-      const multiCmsCrops = await db
-        .collection('fl_content')
-        .where('_fl_meta_.fl_id', '==', mainDoc.id)
-        .where('status', '==', 'PUBLISHED')
-        .get();
-      // when multi language is enabled, then a main document can have more than 1 cms crops
-      if (!multiCmsCrops) {
-        console.log('multiCmsCrops are empty.');
-      } else {
-        for (let [key, value] of Object.entries(multiCmsCrops)) {
-          console.log('printing key values');
-          console.log(key, value);
-        }
-      }
-      multiCmsCrops._docs().forEach(async cmsCrop => {
-        let cropData = cmsCrop.data();
-        console.log('recEngineCropName is :' + cropData);
-        let cropName = cropData.recommendationEngineCropName;
-        let locale = cropData._fl_meta_.locale;
-        let environment = cropData._fl_meta_.env;
-        const cropScoresRef = db.collection('fs_crop_scores');
-        const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-        let territory = locale
-          .split('-')[1]
-          .toUpperCase()
-          .trim();
-        let cropScoreLookUpName = cropName.trim() + '_' + territory;
-        console.log(
-          'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
-        );
-        await score_repository.createLinkIfScoreExists(
-          cropScoresRef,
-          cropScoreCmsLinkRef,
-          cropName,
-          cropScoreLookUpName,
-          cmsCrop.id,
-          locale,
-          environment
-        );
-      });
+    main.forEach(async cmsCrop => {
+      let cropData = cmsCrop.data();
+      console.log('recEngineCropName is :' + cropData.recommendationEngineCropName);
+      let cropName = cropData.recommendationEngineCropName;
+      let locale = cropData._fl_meta_.locale;
+      let environment = cropData._fl_meta_.env;
+      const cropScoresRef = db.collection('fs_crop_scores');
+      const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
+      let territory = locale
+        .split('-')[1]
+        .toUpperCase()
+        .trim();
+      let cropScoreLookUpName = cropName.trim() + '_' + territory;
+      console.log(
+        'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
+      );
+      await score_repository.createLinkIfScoreExists(
+        cropScoresRef,
+        cropScoreCmsLinkRef,
+        cropName,
+        cropScoreLookUpName,
+        cmsCrop.id,
+        locale,
+        environment
+      );
     });
   }
   return null;
