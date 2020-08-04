@@ -49,38 +49,39 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       .where('_fl_meta_.schema', '==', 'crop')
       .where('recommendationEngineCropName', '==', cropQualifierName)
       .where('status', '==', 'PUBLISHED')
-      .get();
-
-    if (!main) {
-      console.log('No crop schema doc found for crop ' + cropQualifierName);
-    }
-    //In reality there should only be one cms document found.
-    console.log('Beginning to create link for crop :' + cropQualifierName);
-    main.forEach(async cmsCrop => {
-      let cropData = cmsCrop.data();
-      let cropName = cropData.recommendationEngineCropName;
-      let locale = cropData._fl_meta_.locale;
-      let environment = cropData._fl_meta_.env;
-      const cropScoresRef = db.collection('fs_crop_scores');
-      const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-      let territory = locale
-        .split('-')[1]
-        .toUpperCase()
-        .trim();
-      let cropScoreLookUpName = cropName.trim() + '_' + territory;
-      console.log(
-        'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
-      );
-      await score_repository.createLinkIfScoreExists(
-        cropScoresRef,
-        cropScoreCmsLinkRef,
-        cropName,
-        cropScoreLookUpName,
-        cmsCrop.id,
-        locale,
-        environment
-      );
-    });
+      .get()
+      .then(snapshot => {
+        snapshot.docs.forEach(async doc => {
+          let cropData = doc.data();
+          console.log('recommendationEngineCropName is :' + cropData.recommendationEngineCropName);
+          let cropName = cropData.recommendationEngineCropName;
+          let locale = cropData._fl_meta_.locale;
+          let environment = cropData._fl_meta_.env;
+          const cropScoresRef = db.collection('fs_crop_scores');
+          const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
+          let territory = locale
+            .split('-')[1]
+            .toUpperCase()
+            .trim();
+          let cropScoreLookUpName = cropName.trim() + '_' + territory;
+          console.log(
+            'Executing create link for crop :' +
+              cropName +
+              ' and lookup name :' +
+              cropScoreLookUpName
+          );
+          await score_repository.createLinkIfScoreExists(
+            cropScoresRef,
+            cropScoreCmsLinkRef,
+            cropName,
+            cropScoreLookUpName,
+            doc.id,
+            locale,
+            environment
+          );
+        });
+        return Promise.resolve(true);
+      });
   }
   return null;
 }
