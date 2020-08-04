@@ -15,8 +15,10 @@ exports.createLinkIfScoreExists = async function(
   cmsLocale,
   cmsEnvironment
 ) {
+  console.log(
+    'Starting to build score for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
+  );
   let score = await buildCMSLinkCropScores(scoresRef, cropName, cropScoreLookUpName);
-  console.log('Executing createLinkIfScoreExists');
   if (score !== '') {
     console.log(`Creating crop link: ${cropScoreLookUpName} to ${cmsDocId} in ${linksRef.path} `);
     await linksRef.doc(cmsDocId).set({

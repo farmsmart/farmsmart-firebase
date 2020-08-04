@@ -44,7 +44,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
   } else if (scoreChange.isInsert) {
     let cropQualifierName = scoreChange.doc.crop.qualifierName;
     console.log('Executing score change insert for crop:' + cropQualifierName);
-    const main = await db
+    await db
       .collection('fl_content')
       .where('_fl_meta_.schema', '==', 'crop')
       .where('recommendationEngineCropName', '==', cropQualifierName)
