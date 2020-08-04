@@ -55,7 +55,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
     }
 
     //In reality there should only be one cms document found.
-    console.log('Beginning to create link.');
+    console.log('Beginning to create link for crop :' + cropQualifierName);
     main.forEach(async mainDoc => {
       const multiCmsCrops = await db
         .collection('fl_content')
@@ -63,6 +63,9 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
         .where('status', '==', 'PUBLISHED')
         .get();
       // when multi language is enabled, then a main document can have more than 1 cms crops
+      if (!multiCmsCrops) {
+        console.log('multiCmsCrops are empty.');
+      }
       multiCmsCrops.forEach(async cmsCrop => {
         let cropData = cmsCrop.data();
         let cropName = cropData.recommendationEngineCropName;
