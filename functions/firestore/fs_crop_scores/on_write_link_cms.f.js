@@ -65,21 +65,22 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
       // when multi language is enabled, then a main document can have more than 1 cms crops
       if (!multiCmsCrops) {
         console.log('multiCmsCrops are empty.');
+      } else {
+        console.log('Objects keys are :' + Object.keys(multiCmsCrops));
       }
       multiCmsCrops.forEach(async cmsCrop => {
         let cropData = cmsCrop.data();
+        console.log('recEngineCropName is :' + cropData.recommendationEngineCropName);
         let cropName = cropData.recommendationEngineCropName;
         let locale = cropData._fl_meta_.locale;
         let environment = cropData._fl_meta_.env;
         const cropScoresRef = db.collection('fs_crop_scores');
         const cropScoreCmsLinkRef = db.collection('fs_crop_score_cms_link');
-        let cropScoreLookUpName =
-          cropName.trim() +
-          '_' +
-          locale
-            .split('-')[1]
-            .toUpperCase()
-            .trim();
+        let territory = locale
+          .split('-')[1]
+          .toUpperCase()
+          .trim();
+        let cropScoreLookUpName = cropName.trim() + '_' + territory;
         console.log(
           'Executing create link for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
         );
