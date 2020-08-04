@@ -192,6 +192,8 @@ jobs:
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.sheets.api.key=${SHEETS_API_KEY}
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.ke.id=${SCORE_DOC_ID_KE}
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.pf.id=${SCORE_DOC_ID_PF}
+            firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.scorematrix.us.id=${SCORE_DOC_ID_US}
+
             firebase functions:config:set --token $FIREBASE_TOKEN --project $FIREBASE_PROJECT farmsmart.slack.api.token=${SLACK_FARMSMART_TOKEN}
 
             echo "Deploy all FireBase artifacts (cloud functions, rules, hosting)"
