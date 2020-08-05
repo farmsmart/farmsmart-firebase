@@ -36,22 +36,15 @@ describe('Score repository', () => {
 
   describe('Create Links for Scores', () => {
     test('should not create if score does not exist', async done => {
-      const snapshot = jest.fn().mockImplementation(() => ({
+      let document = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
-          docs: [{ id: 'Apple' }],
+          exists: false,
         })),
-        then: jest.fn().mockImplementation(() => [
-          {
-            crop: { name: 'Tomato_KE', qualifierName: 'Tomato' },
-          },
-        ]),
       }));
 
       let scoresRef = {
-        get: snapshot,
-        then: snapshot,
+        doc: document,
       };
-
       let linksRef = {};
       let cropName = 'NAME',
         cropScoreLookUpName = 'Tomato_US',
@@ -69,26 +62,19 @@ describe('Score repository', () => {
         cmsEnvironment
       );
 
-      expect(snapshot).toBeCalled();
-
+      expect(document).toBeCalled();
       done();
     });
 
     test('should create if a score exist', async done => {
-      const snapshot = jest.fn().mockImplementation(() => ({
+      let document = jest.fn().mockImplementation(() => ({
         get: jest.fn().mockImplementation(() => ({
-          docs: [{ id: 'Apple' }],
+          exists: true,
         })),
-        then: jest.fn().mockImplementation(() => [
-          {
-            crop: { name: 'Tomato_KE', qualifierName: 'Tomato', region: 'KE' },
-          },
-        ]),
       }));
 
       let scoresRef = {
-        get: snapshot,
-        then: snapshot,
+        doc: document,
       };
 
       let updateDocument = jest.fn();
@@ -114,7 +100,7 @@ describe('Score repository', () => {
         cmsLocale,
         cmsEnvironment
       );
-      expect(snapshot).toBeCalled();
+      expect(document).toBeCalled();
       expect(linkDocument).toBeCalled();
       expect(updateDocument).toBeCalled();
       done();

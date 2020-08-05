@@ -89,136 +89,131 @@ describe('fs_crop_scores On Write', () => {
     done();
   });
 
-  // it('should handle scores but no cms', async done => {
-  //   let insertScoreResult = jest.spyOn(datahelper, 'getScoreChange').mockReturnValue({
-  //     isChange: true,
-  //     isInsert: true,
-  //     doc: {
-  //       crop: {
-  //         name: 'Tomato_KE',
-  //         qualifierName: 'Tomato',
-  //       },
-  //     },
-  //   });
-  //
-  //   let queryMock = jest.fn().mockReturnValue({
-  //     get: jest.fn().mockReturnValue(Promise.resolve([])),
-  //     then: jest.fn().mockImplementation(() => [
-  //       {
-  //         crop: { name: 'Tomato_KE', qualifierName: 'Tomato' },
-  //       },
-  //     ]),
-  //   });
-  //
-  //   let cmsRefMock = jest.fn().mockReturnValueOnce({
-  //     where: jest.fn().mockReturnValue({
-  //       where: jest.fn().mockReturnValue({
-  //         where: queryMock,
-  //       }),
-  //     }),
-  //   });
-  //
-  //   let linksRefMock = jest.fn().mockImplementation(() => {});
-  //   let scoreRefMock = jest.fn().mockImplementation(() => {});
-  //
-  //   let collectionMock = jest
-  //     .fn()
-  //     .mockImplementationOnce(cmsRefMock)
-  //     .mockImplementationOnce(linksRefMock)
-  //     .mockImplementationOnce(scoreRefMock);
-  //
-  //   let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
-  //     collection: collectionMock,
-  //   }));
-  //
-  //   await wrapped(cropScoreChange);
-  //
-  //   expect(insertScoreResult).toBeCalled();
-  //   expect(fs).toBeCalled();
-  //   expect(collectionMock).toHaveBeenCalledTimes(1);
-  //   expect(cmsRefMock).toHaveBeenCalledTimes(1);
-  //   expect(queryMock).toHaveBeenCalledWith('status', '==', 'PUBLISHED');
-  //   done();
-  // });
-  // it('should handle scores and link to cms', async done => {
-  //   let insertScoreResult = jest.spyOn(datahelper, 'getScoreChange').mockReturnValue({
-  //     isChange: true,
-  //     isInsert: true,
-  //     doc: {
-  //       crop: {
-  //         name: 'Tomato_KE',
-  //         qualifierName: 'Tomato',
-  //       },
-  //     },
-  //   });
-  //
-  //   let swahili = { id: 'SWAHILI' };
-  //   let mainEntry = {
-  //     id: 'MAIN',
-  //     data: jest.fn().mockImplementation(() => ({
-  //       _fl_meta_: {
-  //         locale: 'en-US',
-  //         env: 'production',
-  //       },
-  //     })),
-  //   };
-  //
-  //   let queryMock = jest
-  //     .fn()
-  //     .mockImplementationOnce(() => ({
-  //       get: jest.fn().mockReturnValue(Promise.resolve([swahili])),
-  //     }))
-  //     .mockImplementationOnce(() => ({
-  //       get: jest.fn().mockReturnValue(Promise.resolve([mainEntry])),
-  //     }));
-  //
-  //   let fetchSwahili = jest.fn().mockReturnValueOnce({
-  //     where: jest.fn().mockReturnValue({
-  //       where: jest.fn().mockReturnValue({
-  //         where: queryMock,
-  //       }),
-  //     }),
-  //   });
-  //
-  //   let fetchMain = jest.fn().mockReturnValueOnce({
-  //     where: jest.fn().mockReturnValue({
-  //       where: jest.fn().mockReturnValue({
-  //         where: queryMock,
-  //       }),
-  //     }),
-  //   });
-  //
-  //   let cmsRefMock = jest
-  //     .fn()
-  //     .mockImplementationOnce(fetchSwahili)
-  //     .mockImplementationOnce(fetchMain);
-  //
-  //   let linksRefMock = jest.fn().mockImplementation(() => {});
-  //   let scoreRefMock = jest.fn().mockImplementation(() => ({
-  //     doc: jest.fn().mockImplementation(() => ({
-  //       get: jest.fn().mockImplementation(() => ({
-  //         exists: false,
-  //       })),
-  //     })),
-  //   }));
-  //
-  //   let collectionMock = jest
-  //     .fn()
-  //     .mockImplementationOnce(cmsRefMock)
-  //     .mockImplementationOnce(cmsRefMock)
-  //     .mockImplementationOnce(scoreRefMock)
-  //     .mockImplementationOnce(linksRefMock);
-  //
-  //   let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
-  //     collection: collectionMock,
-  //   }));
-  //
-  //   await wrapped(cropScoreChange);
-  //
-  //   expect(insertScoreResult).toBeCalled();
-  //   expect(fs).toBeCalled();
-  //   expect(collectionMock).toBeCalled();
-  //   expect(fetchSwahili).toBeCalled();
-  //   done();
-  // });
+  it('should handle scores but no cms', async done => {
+    let insertScoreResult = jest.spyOn(datahelper, 'getScoreChange').mockReturnValue({
+      isChange: true,
+      isInsert: true,
+      doc: {
+        crop: {
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
+        },
+      },
+    });
+
+    let queryMock = jest.fn().mockReturnValue({
+      get: jest.fn().mockReturnValue(Promise.resolve([])),
+    });
+
+    let cmsRefMock = jest.fn().mockReturnValueOnce({
+      where: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          where: queryMock,
+        }),
+      }),
+    });
+
+    let linksRefMock = jest.fn().mockImplementation(() => {});
+    let scoreRefMock = jest.fn().mockImplementation(() => {});
+
+    let collectionMock = jest
+      .fn()
+      .mockImplementationOnce(cmsRefMock)
+      .mockImplementationOnce(linksRefMock)
+      .mockImplementationOnce(scoreRefMock);
+
+    let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
+      collection: collectionMock,
+    }));
+
+    await wrapped(cropScoreChange);
+
+    expect(insertScoreResult).toBeCalled();
+    expect(fs).toBeCalled();
+    expect(collectionMock).toHaveBeenCalledTimes(1);
+    expect(cmsRefMock).toHaveBeenCalledTimes(1);
+    expect(queryMock).toHaveBeenCalledWith('status', '==', 'PUBLISHED');
+    done();
+  });
+  it('should handle scores and link to cms', async done => {
+    let insertScoreResult = jest.spyOn(datahelper, 'getScoreChange').mockReturnValue({
+      isChange: true,
+      isInsert: true,
+      doc: {
+        crop: {
+          name: 'Tomato_KE',
+          qualifierName: 'Tomato',
+        },
+      },
+    });
+
+    let swahili = { id: 'SWAHILI' };
+    let mainEntry = {
+      id: 'MAIN',
+      data: jest.fn().mockImplementation(() => ({
+        _fl_meta_: {
+          locale: 'en-US',
+          env: 'production',
+        },
+      })),
+    };
+
+    let queryMock = jest
+      .fn()
+      .mockImplementationOnce(() => ({
+        get: jest.fn().mockReturnValue(Promise.resolve([swahili])),
+      }))
+      .mockImplementationOnce(() => ({
+        get: jest.fn().mockReturnValue(Promise.resolve([mainEntry])),
+      }));
+
+    let fetchSwahili = jest.fn().mockReturnValueOnce({
+      where: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          where: queryMock,
+        }),
+      }),
+    });
+
+    let fetchMain = jest.fn().mockReturnValueOnce({
+      where: jest.fn().mockReturnValue({
+        where: jest.fn().mockReturnValue({
+          where: queryMock,
+        }),
+      }),
+    });
+
+    let cmsRefMock = jest
+      .fn()
+      .mockImplementationOnce(fetchSwahili)
+      .mockImplementationOnce(fetchMain);
+
+    let linksRefMock = jest.fn().mockImplementation(() => {});
+    let scoreRefMock = jest.fn().mockImplementation(() => ({
+      doc: jest.fn().mockImplementation(() => ({
+        get: jest.fn().mockImplementation(() => ({
+          exists: false,
+        })),
+      })),
+    }));
+
+    let collectionMock = jest
+      .fn()
+      .mockImplementationOnce(cmsRefMock)
+      .mockImplementationOnce(cmsRefMock)
+      .mockImplementationOnce(scoreRefMock)
+      .mockImplementationOnce(linksRefMock);
+
+    let fs = jest.spyOn(admin, 'firestore', 'get').mockReturnValue(() => ({
+      collection: collectionMock,
+    }));
+
+    await wrapped(cropScoreChange);
+
+    expect(insertScoreResult).toBeCalled();
+    expect(fs).toBeCalled();
+    expect(collectionMock).toBeCalled();
+    expect(fetchSwahili).toBeCalled();
+    done();
+  });
 });

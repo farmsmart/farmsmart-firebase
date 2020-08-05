@@ -15,11 +15,9 @@ exports.createLinkIfScoreExists = async function(
   cmsLocale,
   cmsEnvironment
 ) {
-  console.log(
-    'Starting to build score for crop :' + cropName + ' and lookup name :' + cropScoreLookUpName
-  );
-  let score = await buildCMSLinkCropScores(scoresRef, cropName, cropScoreLookUpName);
-  if (score !== '') {
+  console.log('Checking if score exist for crop :' + cropName + ' lookup :' + cropScoreLookUpName);
+  const score = await scoresRef.doc(cropScoreLookUpName).get();
+  if (score.exists) {
     console.log(`Creating crop link: ${cropScoreLookUpName} to ${cmsDocId} in ${linksRef.path} `);
     await linksRef.doc(cmsDocId).set({
       cropName: cropName,
@@ -29,7 +27,7 @@ exports.createLinkIfScoreExists = async function(
       score: score,
     });
   } else {
-    console.log(`No scores derived for crop : ${cropName} `);
+    console.log('No score available for crop :' + cropName + ' lookup :' + cropScoreLookUpName);
   }
 };
 
@@ -80,26 +78,6 @@ exports.updateSpreadsheet = async function(db, infoRef, spreadsheet) {
     return Promise.resolve(true);
   });
 };
-
-async function buildCMSLinkCropScores(scoresRef, cropName, cropScoreLookUpName) {
-  let docsSnapShot = await scoresRef.get().then(collection => {
-    return collection.docs.map(doc => doc.data());
-  });
-  console.log(`Creating score link for crop : ${cropScoreLookUpName}`);
-  let score = '';
-  for (let doc of docsSnapShot) {
-    if (doc.crop.name === cropScoreLookUpName) {
-      score = doc.crop.name;
-      break;
-    }
-  }
-  if (score !== '') {
-    console.log(`CMS link crop score for crop: ${cropName} is ${score} `);
-  } else {
-    console.log(`No score found for crop: ${cropName}`);
-  }
-  return score;
-}
 
 function toFirebaseDate(date) {
   return admin.firestore.Timestamp.fromDate(date);
