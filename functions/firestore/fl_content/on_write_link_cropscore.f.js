@@ -71,7 +71,7 @@ async function handleAttachCmsCropToCropScore(change, context) {
           .toUpperCase()
           .trim();
       console.log(
-        'Action for  doc:' + cmsCropChange.docId + ' and lookup name : ' + cropScoreLookUpName
+        'Action for  doc:' + cmsCropChange.docId + ' and lookup name is : ' + cropScoreLookUpName
       );
       await score_repository.createLinkIfScoreExists(
         scoresRef,
