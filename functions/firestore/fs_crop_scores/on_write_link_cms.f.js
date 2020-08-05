@@ -58,7 +58,7 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
     console.log('Beginning to create link for crop :' + cropQualifierName);
     main.forEach(async cmsCrop => {
       let cropData = cmsCrop.data();
-      let cropName = cmsCrop.recommendationEngineCropName;
+      let cropName = cropData.recommendationEngineCropName;
       let locale = cropData._fl_meta_.locale;
       let environment = cropData._fl_meta_.env;
       const cropScoresRef = db.collection('fs_crop_scores');
