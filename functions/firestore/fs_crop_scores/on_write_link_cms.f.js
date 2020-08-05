@@ -30,8 +30,10 @@ async function handleAttachCropScoreToCmsCrop(change, context) {
 
   // new attribute qualifierName representing crop name - scoreChange.doc.crop.qualifierName
   if (scoreChange.isDelete) {
-    console.log('Executing score change delete for crop :' + scoreChange.doc.crop.name);
     let score = scoreChange.doc.crop.qualifierName + '_' + scoreChange.doc.crop.region;
+    console.log(
+      'ScoreChange delete for crop :' + scoreChange.doc.crop.qualifierName + ' with score :' + score
+    );
     await db
       .collection('fs_crop_score_cms_link')
       .where('score', '==', score)
