@@ -24,7 +24,7 @@ exports.createLinkIfScoreExists = async function(
       cmsCropId: cmsDocId,
       locale: cmsLocale,
       env: cmsEnvironment,
-      score: score,
+      score: cropScoreLookUpName,
     });
   } else {
     console.log('No score available for crop :' + cropName + ' lookup :' + cropScoreLookUpName);
